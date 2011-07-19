@@ -164,9 +164,6 @@ class Evil_Cdn_HeadBase
 					array_push($this->_address_outside, $prefix . $numb['cdn_address']);				
 				}
 			}		
-
-			file_put_contents('/tmp/array', var_export($this->_address_inside,true),FILE_APPEND);
-			file_put_contents('/tmp/array', var_export($this->_address_outside, true),FILE_APPEND);
 		}
 		
 		/**
