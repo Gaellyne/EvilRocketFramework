@@ -10,7 +10,7 @@ sub helptext() {
 linphone.pl
 
 Usage:  linphone.pl 79033039855 /var/www/sound.wav
-  79033039855		phone number in international format
+  7xxxxxxxxxx		phone number in international format
   /var/www/sound.wav	wav file to play
 EOF
 }
@@ -26,8 +26,6 @@ call ($ARGV[0],$ARGV[1]);
 
 sub call() {
 my ($phoneNumber, $file) = @_;
-# 	my $file = '/var/www/ERC/ocweb/application/tmp/4b420ac0b019237d24d9f2763ee95c9c.mp3.wav';
-# 	my $phoneNumber = "79625552986";
 # 	получаем длину файла
 	my $wav = new Audio::Wav;
 	my $read = $wav -> read( $file );
