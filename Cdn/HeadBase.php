@@ -7,15 +7,25 @@
  * 
  * @see как использовать см. HeadScript и HeadLink
  * 
- * Пути к файлам и папкам задаются в Application.ini
+ * Пути к файлам и папкам задаются в application/configs/cdn.json
  * в виде
- * evil.CDN.js.0.cdn_address = "http://d30tk8m4gt6k7.cloudfront.net/js/extjs/"
- * evil.CDN.js.0.src_address = "/js/extjs/"
- * 
+ *{
+ *  "js":{
+ *   "jQuery":{
+ *     "src_address":"/js/jquery-1.5.1.min.js",
+ *     "cdn_address":[
+ *       "//yandex.st/jquery/1.5.1/jquery.js",
+ *       "//ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js",
+ *       "//ajax.aspnetcdn.com/ajax/jQuery/jquery-1.5.1.min.js",
+ *       "//code.jquery.com/jquery-1.5.1.min.js"
+ *     ],
+ *     "actual_cdn":1
+ * 	  }
+ *  }
+ *}  	
  * Где 
- * 	   evil.CDN - необходимыйпреикс настроек.
  * 	   js - указывает тип файлов для замены (JS, CSS)
- *     0  - порядковый номер паттерна. Если необходимо указать несколько паттернов 
+ *     JQuery  - идентификатор паттерна. Если необходимо указать несколько паттернов 
  *     		замены каждый новый паттерн должен иметь свой идентификатор.
  *     		идентифкатор может быть задан символьным именем
  *     src_address - тот адрес который необходимо заменить
@@ -26,7 +36,16 @@
  *        * После названия директории рекомендуется ставить '/'
  *        	в ином случае паттерн  '/js/extjs' будет соотвествовать строке  '/js/extjsFinal'
  *          и будет заменен на "http://d30tk8m4gt6k7.cloudfront.net/js/extjsFinal".
- * 
+ *        * Может содержать несколько адресов. Указываются в порядке приоритета начиная с первого
+ *        	В случае недоступности первого, будет использован второй и т.д.
+ *          если ни одна из ссылок недоступна CDN не будет использоватьсяи файлы будут отдаватся с этого сервера
+ * 		"actual_cdn":может принимать несколько значений:
+ * 			 - disabled - отключено пользователем. Автоматически не будет включатся при проверки доступности CDN
+ *           - 0 выключен CDN автоматом в следствии недоступности ни одого CDN сервера
+ *           - 1 включено перенаправлление на первый по счету CDN сервер
+ *           - 2 включено перенаправлление на второй по счету CDN сервер
+ *           - и т.д.
+ *           
  * @author Sergey Bukharov
  * @date 21.06.2011
  * 
@@ -62,7 +81,6 @@ class Evil_Cdn_HeadBase
 	private $_config;
 	
 	/**
-	 * 
 	 * js or css or ...
 	 * @var string
 	 */
@@ -70,7 +88,14 @@ class Evil_Cdn_HeadBase
 
 	public function __construct($content_type)
 	{
-		$this->_getConfig();
+		//если Json не корректный или файл настроек не найден
+		//тихонько выходим, в дальнейшем никаких замен не будет
+		try{
+			$this->_getConfig();
+		}catch (Exception $e){
+			//TODO если будет использоваться логирование записать исключение в лог
+			return false;
+		}
 					
 		$content_type = strtolower($content_type);
 		if ($content_type != 'css' || $content_type !='js'){
@@ -82,6 +107,7 @@ class Evil_Cdn_HeadBase
 		//проверяем адреса на корректность и правим
 		$this->_validateAdress();		
 	}
+	
 
 	/**
 	 * вызывается при рендеринге контента.
@@ -114,14 +140,21 @@ class Evil_Cdn_HeadBase
 		 */
 	public function _getConfig()
 	{
-		//получаем ссылку на хранилище настроек
+/*		//получаем ссылку на хранилище настроек
 		try {
 			$config = Zend_Registry::get('config');
 		} catch (Exception $e) {
 			throw new Exception('Helper CDN не смог получить доступ к настройкам в Application.ini', 500);
 		}	
 		
-		$this->_config = $config['evil']['CDN'];			
+		$this->_config = $config['evil']['CDN'];	*/		
+		
+		//$json = file_get_contents(APPLICATION_PATH . "/config/cdn.json");
+		$path = APPLICATION_PATH . "/configs/cdn.json";
+		$json = new Evil_Json($path);
+		$this->_config = $json->toArray();
+		
+		return $json;
 	}
 	
 	
@@ -157,11 +190,37 @@ class Evil_Cdn_HeadBase
 				return;
 			}	
 			
-			//добавляем адреса в массив для замены 
-			if( isset($this->_config[$this->_content_type])){		
-				foreach ($this->_config[$this->_content_type] as $numb){
+			//Пробегаемся по адреса для замены и добавляем их
+			foreach ($this->_config[$this->_content_type] as $numb){
+				//если фалага включения CDN Не обранужено
+				if (!isset($numb['actual_cdn'])){
+					continue;	
+				}
+				
+				//если перенаправление по текущему CDN выключено 
+				if (false == $numb['actual_cdn'] || 'disabled' == $numb['actual_cdn'] ||
+					0 == $numb['actual_cdn'] ){
+					continue;	
+				}
+				
+				//если CDN адрес только один записываем его
+				if (!is_array($numb['cdn_address'])){
 					array_push($this->_address_inside,  $prefix . $numb['src_address']);
-					array_push($this->_address_outside, $prefix . $numb['cdn_address']);				
+					array_push($this->_address_outside, $prefix . $numb['cdn_address']);
+					continue;					
+				}
+				
+				//указатель на  рабочий CDN должен быть цифрой
+				if (!is_numeric($numb['actual_cdn'])){
+					continue;
+				}
+				//если адресов CDN несколько, записываем тот, на который указывает опция actual_cdn
+				$cdn_number = ((int) $numb['actual_cdn']) - 1;
+							  //[cdn_address][2] к примеру 	
+				if (isset($numb['cdn_address'][$cdn_number])){
+					array_push($this->_address_inside,  $prefix . $numb['src_address']);
+					array_push($this->_address_outside, $prefix . $numb['cdn_address'][$cdn_number ]);
+					continue;						
 				}
 			}		
 		}
@@ -186,5 +245,5 @@ class Evil_Cdn_HeadBase
 			return $str_paths;
 										
 		} 	
-	
+			
 }
