@@ -40,41 +40,55 @@
         	return -1;	
     	}
     	
-    	    
-        public function doAuth ($controller)
+    	/**
+         * @description do auth (:
+         * @throws Evil_Exception|Exception
+         * @param $controller
+         * @param array $login
+         * @param array $password
+         * @param string $tableName
+         * @return int
+         * @author BreathLess, Se#
+         * @version 0.0.2
+         * @changeLog
+         * 0.0.2 login and password variabled, tableName is dynamic
+         */
+        public function doAuth ($controller, $login = array(), $password = array(), $tableName = 'user')
         {
         	// Support custom views for auth form
         	$config = Zend_Registry::get('config');
         	$config = (is_object($config)) ? $config->toArray() : $config;
-        	
+
         	if (isset($config['evil']['auth']['native']['view']) && !empty($config['evil']['auth']['native']['view']))
-        	{
 				return $this->_doCustomAuth($controller, $config['evil']['auth']['native']['view']);
-        	}
         	else
         	{
-        		$form = new Evil_Auth_Form_Native();           
+        		$form = new Evil_Auth_Form_Native();
         		$controller->view->form = $form;
-        		
+
 	            if ($controller->getRequest()->isPost())
 	                if ($form->isValid($_POST))
 	                {
-	                    $data = $form->getValues();
-	
-	                    $user = Evil_Structure::getObject('user');
-	
-	                    $user->where('nickname','=', $data['username']);
-	
+	                    $data     = $form->getValues();
+                        $login    = empty($login)    ? array('field' => 'nickname', 'value' => 'username') : $login;
+                        $password = empty($password) ? array('field' => 'password', 'value' => 'password') : $password;
+
+                        if(!isset($data[$login['value']]) || !isset($data[$password['value']]))
+                            throw new Exception(' Missed "' . $login['value'] . '" or "' . $password['value'] . '" field');
+
+	                    $user = Evil_Structure::getObject($tableName);
+	                    $user->where($login['field'],'=', $data[$login['value']]);
+
 	                    if ($user->load())
-	                    {                       
-	                        if ($user->getValue('password') == md5($data['password']))
+	                    {
+	                        if ($user->getValue($password['field']) == md5($data[$password['value']]))
 	                            return $user->getId();
 	                        else
 	                            throw new Evil_Exception('Password Incorrect', 4042);
 	                    }
 	                    else
 	                        throw new Evil_Exception('Unknown user', 4044);
-	                }        		
+	                }
         	}
             
             return -1;
