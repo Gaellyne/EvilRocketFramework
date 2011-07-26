@@ -450,21 +450,13 @@ abstract class Evil_Action_Abstract implements Evil_Action_Interface
 
     /**
      * @description If view not exists, render default
-     * @param object $controller
-     * @param string $action
-     * @return void
+     * @return void|bool
      * @author Se#
      * @version 0.0.3
      */
     public function ifViewNotExistsRenderDefault()
     {
         $controller = self::getStatic('controller');
-
-        if(!isset($controller->view->evilAutoloads))
-            $controller->view->evilAutoloads = array();
-        
-        if($this->_skipFunction(__FUNCTION__))
-            return true;
 
         // construct view path
         $viewPath = APPLICATION_PATH . '/views/scripts/' . $controller->getHelper('viewRenderer')->getViewScript();
