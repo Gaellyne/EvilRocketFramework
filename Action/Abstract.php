@@ -3,7 +3,9 @@
  * @description Abstract action, use default config if there is no personal,
  * use default view if there is no personal view
  * @author Se#
- * @version 0.0.8
+ * @version 0.0.9
+ * @changeLog
+ * 0.0.9 named class-method in invoke (see _prepareArgsFromConfig)
  */
 abstract class Evil_Action_Abstract implements Evil_Action_Interface
 {
@@ -44,11 +46,12 @@ abstract class Evil_Action_Abstract implements Evil_Action_Interface
             if(isset($invokeConfig['method-to-variable']))
             {// get args
                 $args = func_get_args();
+                $named = (!isset($invokeConfig['named']) || !$invokeConfig['named']) ? false : true;
 
                 // operate
                 foreach($invokeConfig['method-to-variable'] as $variable)
                 {// method can be a string (function) or an array (class, method)
-                    list($method, $field) = $this->_prepareArgsFromConfig($variable);
+                    list($method, $field) = $this->_prepareArgsFromConfig($variable, $named);
      
                     $result = $args;
                     // check method existing
@@ -247,15 +250,24 @@ abstract class Evil_Action_Abstract implements Evil_Action_Interface
      * @author Se#
      * @version 0.0.2
      */
-    protected function _prepareArgsFromConfig($args)
+    protected function _prepareArgsFromConfig($args, $named = true)
     {
         if(is_string($args))
             return array($args, null);
         elseif(is_array($args))
         {
-            $class    = isset($args['class'])  ? $args['class']  : get_class($this);
-            $method   = isset($args['method']) ? $args['method'] : 'get';
-            $field    = isset($args['field'])  ? $args['field']  : null;
+            if($named)
+            {
+                $class    = isset($args['class'])  ? $args['class']  : get_class($this);
+                $method   = isset($args['method']) ? $args['method'] : 'get';
+                $field    = isset($args['field'])  ? $args['field']  : null;
+            }
+            else
+            {
+                $class    = isset($args[0])  ? $args['class']  : get_class($this);
+                $method   = isset($args[1]) ? $args['method'] : 'get';
+                $field    = isset($args[2])  ? $args['field']  : null;
+            }
 
             return array(array($class, $method), $field);
         }
@@ -438,21 +450,13 @@ abstract class Evil_Action_Abstract implements Evil_Action_Interface
 
     /**
      * @description If view not exists, render default
-     * @param object $controller
-     * @param string $action
-     * @return void
+     * @return void|bool
      * @author Se#
      * @version 0.0.3
      */
     public function ifViewNotExistsRenderDefault()
     {
         $controller = self::getStatic('controller');
-
-        if(!isset($controller->view->evilAutoloads))
-            $controller->view->evilAutoloads = array();
-        
-        if($this->_skipFunction(__FUNCTION__))
-            return true;
 
         // construct view path
         $viewPath = APPLICATION_PATH . '/views/scripts/' . $controller->getHelper('viewRenderer')->getViewScript();

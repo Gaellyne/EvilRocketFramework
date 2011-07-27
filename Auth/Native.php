@@ -53,7 +53,7 @@
          * @changeLog
          * 0.0.2 login and password variabled, tableName is dynamic
          */
-        public function doAuth ($controller, $login = array(), $password = array(), $tableName = 'user')
+        public function doAuth ($controller, $login = array(), $password = array(), $formConfig = array(), $tableName = 'user')
         {
         	// Support custom views for auth form
         	$config = Zend_Registry::get('config');
@@ -63,7 +63,11 @@
 				return $this->_doCustomAuth($controller, $config['evil']['auth']['native']['view']);
         	else
         	{
-        		$form = new Evil_Auth_Form_Native();
+                if(empty($formConfig))
+        		    $form = new Evil_Auth_Form_Native();
+                else
+                    $form = new Zend_Form($formConfig);
+                
         		$controller->view->form = $form;
 
 	            if ($controller->getRequest()->isPost())
