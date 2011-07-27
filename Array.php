@@ -2,8 +2,9 @@
 /**
  * @description Обработчик массивов
  * @author nur, Se#
- * @version 0.0.4
+ * @version 0.0.5
  * @changeLog
+ * 0.0.5 fixes 
  * 0.0.4 added methods convert and convertLevel2LRKeys
  * 0.0.3 added methods byField and filter
  * 0.0.2 added methods jut, prepareData
@@ -140,7 +141,7 @@ class Evil_Array
     {
         foreach($need as $field)
         {
-            $value = $r[$field] = isset($src[$field]) ? $src[$field] : '';
+            $value = isset($src[$field]) ? $src[$field] : '';
 
             if($bf)// if by field
                 $r[$field] = $value;
@@ -281,6 +282,62 @@ class Evil_Array
                 return $result;
             elseif($i)// the same branch
                 return $result;
+        }
+
+        return $result;
+    }
+
+    /**
+     * @description convert parentId array to the byLevel array
+     * @static
+     * @param array $src
+     * @param string $parentField
+     * @param string $idField
+     * @return array
+     */
+    public static function convertParentId2Level(array $src, $parentField = 'parent', $idField = 'id')
+    {
+        $result  = array();
+        $byId    = array();
+        $byLevel = array();
+        /**
+         * byId => array(
+         *      1 => array(
+         *          21 => array()
+         *      )
+         * )
+         */
+
+        $srcCount = count($src);
+
+        for($i = 0; $i < $srcCount; $i++)
+        {
+            if(!isset($src[$i]) || !isset($src[$i][$idField]) || !isset($src[$i][$parentField]))
+                continue;
+
+            if(isset($byId[$src[$i][$parentField]]))
+            {
+                $level = $byId[$src[$i][$parentField]]['level'] + 1;
+                $byId[$src[$i][$parentField]]['children'][] = $src[$i][$idField];
+            }
+            else
+                $level = 1;
+
+            $byId[$src[$i][$idField]] = $src[$i];
+            $byId[$src[$i][$idField]]['level'] = $level;
+            $byId[$src[$i][$idField]]['children'] = array();
+        }
+
+        foreach($byId as $id => $data)
+        {
+            $result[] = $data;
+            if(!empty($data['children']))
+            {
+                foreach($data['children'] as $childId)
+                {
+                    // todo
+                }
+            }
         }
 
         return $result;
