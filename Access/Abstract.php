@@ -47,7 +47,7 @@ abstract class Evil_Access_Abstract extends Zend_Controller_Plugin_Abstract {
 				 * я считаю что так будет лучше
 				 * @author NuR
 				 */
-				$this->_response->setRedirect('/auth/');
+				$this->_response->setRedirect('/');
 				//	throw new Evil_Exception ( 'Access Denied for ' . $request->getControllerName () . '::' . $request->getActionName (), 403 );
 			}
 		} else {
