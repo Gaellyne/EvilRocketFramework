@@ -117,7 +117,7 @@ class Evil_Array
             {
                 self::$operated[$i] = true;// mark the current row
                 $data = self::prepareData($src[$i], $need);// extract needed fields
-                $data[$cf] = self::jit($src, $need, $src[$i][$lf], $i+1);// get children
+                $data[$cf] = self::jit($src, $need, $src[$i][$lf], $i+1, $lf, $cf);// get children
                 $result[] = $data;// save node
                 continue;
             }
