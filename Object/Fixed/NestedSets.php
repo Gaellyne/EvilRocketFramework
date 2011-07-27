@@ -62,7 +62,7 @@ class Evil_Object_Fixed_NestedSets extends Evil_Object_Fixed_Required
         $rk = (int) $data['rk'];
 
         // Delete node/branch
-        $this->_fixed->delete('(lk>="' . $lk . '")&&(rk<"' . $rk . '")');
+        $this->_fixed->delete('(lk>="' . $lk . '")&&(rk<="' . $rk . '")');
 
         $newRk = $rk-$lk+1;
 
