@@ -3,7 +3,9 @@
  * @description Abstract action, use default config if there is no personal,
  * use default view if there is no personal view
  * @author Se#
- * @version 0.0.6
+ * @version 0.0.9
+ * @changeLog
+ * 0.0.9 named class-method in invoke (see _prepareArgsFromConfig)
  */
 abstract class Evil_Action_Abstract implements Evil_Action_Interface
 {
@@ -44,11 +46,12 @@ abstract class Evil_Action_Abstract implements Evil_Action_Interface
             if(isset($invokeConfig['method-to-variable']))
             {// get args
                 $args = func_get_args();
+                $named = (!isset($invokeConfig['named']) || !$invokeConfig['named']) ? false : true;
 
                 // operate
                 foreach($invokeConfig['method-to-variable'] as $variable)
                 {// method can be a string (function) or an array (class, method)
-                    list($method, $field) = $this->_prepareArgsFromConfig($variable);
+                    list($method, $field) = $this->_prepareArgsFromConfig($variable, $named);
      
                     $result = $args;
                     // check method existing
@@ -70,25 +73,34 @@ abstract class Evil_Action_Abstract implements Evil_Action_Interface
     /**
      * @description get invoke config, may get personal for controller & action
      * @static
-     * @return array|mixed
+     * @return array
      * @author Se#
-     * @version 0.0.2
+     * @version 0.0.4
      */
     public static function getInvokeConfig($params)
     {
         $personalPath = APPLICATION_PATH . '/configs/evil/invoke.json';
         $generalPath  = __DIR__ . '/Abstract/application/configs/invoke.json';
-        // decide what config get
-        $path   = file_exists($personalPath) ? $personalPath : (file_exists($generalPath) ? $generalPath : false);
-        $config = $path ? json_decode(file_get_contents($path), true) : false;
+        $config       = is_file($generalPath) ? json_decode(file_get_contents($generalPath), true) : array();
 
-        // if there is personal config for current controller
-        if(isset($params['controller']) && is_array($config) && isset($config[$params['controller']]))
+        if(is_file($personalPath))
         {
-            $config = $config[$params['controller']];
-            // if there is personal config for current action
-            if(isset($params['action']) && isset($config[$params['action']]))
-                $config = $config[$params['action']];
+            $pConfig = json_decode(file_get_contents($personalPath), true);
+            // if there is personal config for current controller
+            if(isset($params['controller']) && is_array($pConfig) && isset($pConfig[$params['controller']]))
+            {
+                // if there is personal config for current action
+                if(isset($params['action']) &&
+                   isset($pConfig[$params['controller']][$params['action']]) &&
+                   isset($pConfig[$params['controller']][$params['action']]['method-to-variable']))
+                {
+                    $config = $pConfig[$params['controller']][$params['action']];
+                }
+                elseif(isset($pConfig[$params['controller']]['method-to-variable']))
+                    $config = $pConfig[$params['controller']];
+            }
+            elseif(isset($pConfig['method-to-variable']))
+                $config = $pConfig;
         }
 
         return $config;
@@ -238,15 +250,24 @@ abstract class Evil_Action_Abstract implements Evil_Action_Interface
      * @author Se#
      * @version 0.0.2
      */
-    protected function _prepareArgsFromConfig($args)
+    protected function _prepareArgsFromConfig($args, $named = true)
     {
         if(is_string($args))
             return array($args, null);
         elseif(is_array($args))
         {
-            $class    = isset($args['class'])  ? $args['class']  : get_class($this);
-            $method   = isset($args['method']) ? $args['method'] : 'get';
-            $field    = isset($args['field'])  ? $args['field']  : null;
+            if($named)
+            {
+                $class    = isset($args['class'])  ? $args['class']  : get_class($this);
+                $method   = isset($args['method']) ? $args['method'] : 'get';
+                $field    = isset($args['field'])  ? $args['field']  : null;
+            }
+            else
+            {
+                $class    = isset($args[0])  ? $args['class']  : get_class($this);
+                $method   = isset($args[1]) ? $args['method'] : 'get';
+                $field    = isset($args[2])  ? $args['field']  : null;
+            }
 
             return array(array($class, $method), $field);
         }
@@ -429,21 +450,13 @@ abstract class Evil_Action_Abstract implements Evil_Action_Interface
 
     /**
      * @description If view not exists, render default
-     * @param object $controller
-     * @param string $action
-     * @return void
+     * @return void|bool
      * @author Se#
      * @version 0.0.3
      */
     public function ifViewNotExistsRenderDefault()
     {
         $controller = self::getStatic('controller');
-
-        if(!isset($controller->view->evilAutoloads))
-            $controller->view->evilAutoloads = array();
-        
-        if($this->_skipFunction(__FUNCTION__))
-            return true;
 
         // construct view path
         $viewPath = APPLICATION_PATH . '/views/scripts/' . $controller->getHelper('viewRenderer')->getViewScript();
@@ -706,15 +719,6 @@ abstract class Evil_Action_Abstract implements Evil_Action_Interface
         }
 
         return $root;
-    }
-
-    public static function partial($controllerName, $actionName, $actionDo = 'default')
-    {
-        $link = 'http://' . $_SERVER['SERVER_NAME'] . '/'
-                                  . $controllerName . '/' . $actionName . '/do/' . $actionDo . '/partial/yes';
-
-        $data = file_get_contents($link);
-        return $data;
     }
 
     /**
