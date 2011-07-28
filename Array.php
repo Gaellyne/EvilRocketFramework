@@ -366,7 +366,7 @@ class Evil_Array
      * @author Se#
      * @version 0.0.1
      */
-    public function resetKeys($left = 0, $right = 0)
+    public static function resetKeys($left = 0, $right = 0)
     {
         self::$_lk = (int) $left;
         self::$_rk = (int) $right;
