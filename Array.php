@@ -315,7 +315,7 @@ class Evil_Array
                 {
                     self::$operated[$row[$if]] = true;
 
-                    $row[$if] = $level;
+                    $row['level'] = $level;
                     $rid[] = $row;
                     $children = self::convertParentId2Level($data, $row[$if], $i+1, $level+1, $pf, $if);
                     foreach($children as $child)
