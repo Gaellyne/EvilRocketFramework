@@ -317,7 +317,7 @@ class Evil_Array
 
                     $row[$if] = $level;
                     $rid[] = $row;
-                    $children = self::splitPid($data, $row[$if], $i+1, $level+1, $pf, $if);
+                    $children = self::convertParentId2Level($data, $row[$if], $i+1, $level+1, $pf, $if);
                     foreach($children as $child)
                         $rid[] = $child;
                 }
