@@ -290,56 +290,40 @@ class Evil_Array
     /**
      * @description convert parentId array to the byLevel array
      * @static
-     * @param array $src
-     * @param string $parentField
-     * @param string $idField
+     * @param array $data
+     * @param int $parentId
+     * @param int $index
+     * @param int $level
+     * @param string $pf parent field
+     * @param string $if  id field
      * @return array
+     * @author Se#
+     * @version 0.0.1
      */
-    public static function convertParentId2Level(array $src, $parentField = 'parent', $idField = 'id')
+    public static function convertParentId2Level(array $data, $parentId = 0, $index = 0, $level = 1, $pf = 'parent', $if = 'id')
     {
-        $result  = array();
-        $byId    = array();
-        $byLevel = array();
-        /**
-         * byId => array(
-         *      1 => array(
-         *          21 => array()
-         *      )
-         * )
-         */
+        $rid = array();
+        $count = count($data);
 
-        $srcCount = count($src);
-
-        for($i = 0; $i < $srcCount; $i++)
+        for($i = $index; $i < $count; $i++)
         {
-            if(!isset($src[$i]) || !isset($src[$i][$idField]) || !isset($src[$i][$parentField]))
-                continue;
+            $row = $data[$i];
 
-            if(isset($byId[$src[$i][$parentField]]))
+            if(!isset(self::$operated[$row[$if]]))
             {
-                $level = $byId[$src[$i][$parentField]]['level'] + 1;
-                $byId[$src[$i][$parentField]]['children'][] = $src[$i][$idField];
-            }
-            else
-                $level = 1;
-
-            $byId[$src[$i][$idField]] = $src[$i];
-            $byId[$src[$i][$idField]]['level'] = $level;
-            $byId[$src[$i][$idField]]['children'] = array();
-        }
-
-        foreach($byId as $id => $data)
-        {
-            $result[] = $data;
-            if(!empty($data['children']))
-            {
-                foreach($data['children'] as $childId)
+                if($row[$pf] == $parentId)
                 {
-                    // todo
+                    self::$operated[$row[$if]] = true;
+
+                    $row[$if] = $level;
+                    $rid[] = $row;
+                    $children = self::splitPid($data, $row[$if], $i+1, $level+1, $pf, $if);
+                    foreach($children as $child)
+                        $rid[] = $child;
                 }
             }
         }
 
-        return $result;
+        return $rid;
     }
 }
