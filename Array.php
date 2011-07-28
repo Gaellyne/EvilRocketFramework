@@ -2,8 +2,9 @@
 /**
  * @description Обработчик массивов
  * @author nur, Se#
- * @version 0.0.5
+ * @version 0.0.6
  * @changeLog
+ * 0.0.6 resetKeys()
  * 0.0.5 fixes 
  * 0.0.4 added methods convert and convertLevel2LRKeys
  * 0.0.3 added methods byField and filter
@@ -355,5 +356,19 @@ class Evil_Array
             return false;
 
         return true;
+    }
+
+    /**
+     * @description reset keys
+     * @param int $left
+     * @param int $right
+     * @return void
+     * @author Se#
+     * @version 0.0.1
+     */
+    public function resetKeys($left = 0, $right = 0)
+    {
+        self::$_lk = (int) $left;
+        self::$_rk = (int) $right;
     }
 }
