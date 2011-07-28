@@ -264,9 +264,9 @@ abstract class Evil_Action_Abstract implements Evil_Action_Interface
             }
             else
             {
-                $class    = isset($args[0])  ? $args['class']  : get_class($this);
-                $method   = isset($args[1]) ? $args['method'] : 'get';
-                $field    = isset($args[2])  ? $args['field']  : null;
+                $class    = isset($args[0])  ? $args[0] : get_class($this);
+                $method   = isset($args[1])  ? $args[1] : 'get';
+                $field    = isset($args[2])  ? $args[2] : null;
             }
 
             return array(array($class, $method), $field);
