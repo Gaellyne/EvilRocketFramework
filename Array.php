@@ -309,11 +309,13 @@ class Evil_Array
         {
             $row = $data[$i];
 
-            if(!isset(self::$operated[$row[$if]]))
+            //if(!isset(self::$operated[$row[$if]]))
+            if(!self::operated($data, $row[$if], true))
             {
                 if($row[$pf] == $parentId)
                 {
-                    self::$operated[$row[$if]] = true;
+                    self::operated($data, $row[$if]);
+                    //self::$operated[$row[$if]] = true;
 
                     $row['level'] = $level;
                     $rid[] = $row;
@@ -325,5 +327,32 @@ class Evil_Array
         }
 
         return $rid;
+    }
+
+    /**
+     * @description operate operated data
+     * @static
+     * @param mixed $data
+     * @param string $id
+     * @param bool $ask
+     * @return bool
+     * @author Se#
+     * @version 0.0.1
+     */
+    public static function operated($data, $id, $ask = false)
+    {
+        $opId = sha1(json_encode($data));
+
+        if(!isset(self::$operated[$opId]))
+            self::$operated[$opId] = array();
+
+        if(!$ask)
+            self::$operated[$opId][$id] = true;
+        elseif(isset(self::$operated[$opId][$id]))
+            return true;
+        else
+            return false;
+
+        return true;
     }
 }
