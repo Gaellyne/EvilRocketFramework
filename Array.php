@@ -252,12 +252,13 @@ class Evil_Array
 
         for($i = $index; $i < $count; $i++)
         {
-            if(isset(self::$operated[$i]))// do not operate a row second time
+            if(self::operated($src, $i, true))// do not operate a row second time
                 continue;
 
             if($src[$i][$levelField] > $curLevel)// child
             {
-                self::$operated[$i] = true;
+                self::operated($src, $i);
+                //self::$operated[$i] = true;
                 //$prepared = self::prepareData($src[$i], $needed);
 				self::$_lk++;
 				self::$_rk = self::$_lk+1;
