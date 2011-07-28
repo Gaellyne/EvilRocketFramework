@@ -266,7 +266,7 @@ class Evil_Array
 				$result[$i]['rk'] = self::$_rk;
 
                 // get children for a child
-                $result += self::convertLevel2LRKeys($src, $needed, $src[$i][$levelField], $i+1);
+                $result += self::convertLevel2LRKeys($src, $needed, $src[$i][$levelField], $i+1, $levelField);
 				if(isset($result[$i+1]))
 				{
 					self::$_rk++;
