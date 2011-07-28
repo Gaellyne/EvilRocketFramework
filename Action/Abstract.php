@@ -246,6 +246,7 @@ abstract class Evil_Action_Abstract implements Evil_Action_Interface
     /**
      * @description decide in what class should call a method
      * @param array|string $args
+     * @param bool $named
      * @return array
      * @author Se#
      * @version 0.0.2
