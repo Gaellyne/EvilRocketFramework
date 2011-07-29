@@ -1,9 +1,11 @@
 <?php
 /**
+ * @description Works with Redmine's issues
  * @throws Exception
  * @author Se#
- * @version 0.0.1
- * @description Works with Redmine's issues
+ * @version 0.0.2
+ * @changeLog
+ * 0.0.2 see __construct() v.0.0.2
  */
 class Evil_Rest_Redmine_Issue extends Evil_Rest_Client
 {
@@ -28,31 +30,40 @@ class Evil_Rest_Redmine_Issue extends Evil_Rest_Client
      * @throws Exception
      * @param array $args
      * @param string $key
+     * @param bool $request
      * @author Se#
-     * @version 0.0.1
+     * @version 0.0.2
+     * @changeLog
+     * 0.0.2 general/personal configs
      */
     public function __construct($args, $key, $request = false)
     {// get keys configuration
-        if(is_file(APPLICATION_PATH . '/configs/redmine/keys.json'))
+        $personal = APPLICATION_PATH . '/configs/redmine/keys.json';
+        $general  = __DIR__ . '/default.json';
+
+        $keys = array();
+
+        if(is_file($personal))
+            $keys = json_decode(file_get_contents($personal), true);
+        elseif(is_file($general))
+            $keys = json_decode(file_get_contents($personal), true);
+
+        // if access is private, check rights for the current key
+        if(isset($keys['private']) && $keys['private'] && isset($keys['keys']) && !isset($keys['keys'][$key]))
+            throw new Exception(' Access denied ');
+
+        if(isset($args['url']))
         {
-            $keys = json_decode(file_get_contents(APPLICATION_PATH . '/configs/redmine/keys.json'), true);
-            // if access is private, check rights for the current key
-            if(isset($keys['private']) && $keys['private'] && isset($keys['keys']) && !isset($keys['keys'][$key]))
-                throw new Exception(' Access denied ');
-
-            if(isset($args['url']))
-            {
-                $this->_site = $args['url'];
-                unset($args['url']);
-            }
-
-            $data = array(
-                'url'    => $this->_site . $this->_requestFormat . '?key=' . $key,
-                'params' => array('issue' => $this->_getParams($keys, $args))
-            );
-
-            parent::__construct($data, $request);
+            $this->_site = $args['url'];
+            unset($args['url']);
         }
+
+        $data = array(
+            'url'    => $this->_site . $this->_requestFormat . '?key=' . $key,
+            'params' => array('issue' => $this->_getParams($keys, $args))
+        );
+
+        parent::__construct($data, $request);
     }
 
     /**
@@ -69,7 +80,10 @@ class Evil_Rest_Redmine_Issue extends Evil_Rest_Client
         if(isset($keys['default']))
             $default = $keys['default'];
 
-        $need  = isset($keys['need']) ? $keys['need'] : array('project_id', 'subject', 'description', 'tracker_id');
+        $need  = isset($keys['need'])
+                ? $keys['need']
+                : array('project_id', 'subject', 'description', 'tracker_id', 'assigned_to_id');
+        
         $data  = array();
         $count = count($need);
         for($i = 0; $i < $count; $i++)
