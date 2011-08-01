@@ -110,30 +110,36 @@ class Evil_Registration
     {
         if ($request->isPost())
         {
-            if(isset($this->_cfg['dispatch']['filters']) && is_array($this->_cfg['dispatch']['filters']))
+            $this->makeForm();
+            if($this->_form->isValid($params))
             {
-                $count  = count($this->_cfg['dispatch']['filters']);
-                $result = $params;
-
-                for($i = 0; $i < $count; $i++)
+                if(isset($this->_cfg['dispatch']['filters']) && is_array($this->_cfg['dispatch']['filters']))
                 {
-                    $result = call_user_func_array($this->_cfg['dispatch']['filters'][$i], array($result));
-                    if(!$result)
-                        throw new Exception('Filtering failed');
+                    $count  = count($this->_cfg['dispatch']['filters']);
+                    $result = $params;
+
+                    for($i = 0; $i < $count; $i++)
+                    {
+                        $result = call_user_func_array($this->_cfg['dispatch']['filters'][$i], array($result));
+                        if(!$result)
+                            throw new Exception('Filtering failed');
+                    }
+                }
+
+                if(isset($this->_cfg['dispatch']['db']) && is_array($this->_cfg['dispatch']['db']))
+                {
+                    $result = $this->_clear($result);
+                    if(isset($this->_cfg['dispatch']['db']['tableName']))
+                    {
+                        $table = new Zend_Db_Table(Evil_DB::scope2table($this->_cfg['dispatch']['db']['tableName']));
+                        $table->insert($result);
+                    }
+                    else
+                        return false;
                 }
             }
-
-            if(isset($this->_cfg['dispatch']['db']) && is_array($this->_cfg['dispatch']['db']))
-            {
-                $result = $this->_clear($result);
-                if(isset($this->_cfg['dispatch']['db']['tableName']))
-                {
-                    $table = new Zend_Db_Table(Evil_DB::scope2table($this->_cfg['dispatch']['db']['tableName']));
-                    $table->insert($result);
-                }
-                else
-                    return false;
-            }
+            else
+                return false;
         }
         else
             return false;
