@@ -2,8 +2,9 @@
 /**
  * @description Simplify for a registration action
  * @author Se#
- * @version 0.0.2
+ * @version 0.0.3
  * @changeLog
+ * 0.0.3 see dispatch() v.0.0.2
  * 0.0.2 dispatch()
  */
 class Evil_Registration
@@ -99,9 +100,11 @@ class Evil_Registration
      * @description dispatch the request for a registration
      * @param array $params
      * @param Zend_Controller_Request_Abstract $request
-     * @return void
+     * @return bool
      * @author Se#
-     * @version 0.0.1
+     * @version 0.0.2
+     * @changeLog
+     * 0.0.2 return bool
      */
     public function dispatch(array $params, $request)
     {
@@ -128,8 +131,14 @@ class Evil_Registration
                     $table = new Zend_Db_Table(Evil_DB::scope2table($this->_cfg['dispatch']['db']['tableName']));
                     $table->insert($result);
                 }
+                else
+                    return false;
             }
         }
+        else
+            return false;
+
+        return true;
     }
 
     /**
