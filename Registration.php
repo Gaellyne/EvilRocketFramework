@@ -2,8 +2,9 @@
 /**
  * @description Simplify for a registration action
  * @author Se#
- * @version 0.0.5
+ * @version 0.0.6
  * @changeLog
+ * 0.0.6 error log
  * 0.0.5 confirmPassword()
  * 0.0.4 notEmpty()
  * 0.0.3 see dispatch() v.0.0.2
@@ -34,6 +35,14 @@ class Evil_Registration
      * @version 0.0.1
      */
     protected $_form = null;
+
+    /**
+     * @description errors list
+     * @var array
+     * @author Se#
+     * @version 0.0.1
+     */
+    public $errors = array();
 
     /**
      * @throws Exception
@@ -104,8 +113,9 @@ class Evil_Registration
      * @param Zend_Controller_Request_Abstract $request
      * @return bool
      * @author Se#
-     * @version 0.0.2
+     * @version 0.0.3
      * @changeLog
+     * 0.0.3 log errors, accept error messages for filters
      * 0.0.2 return bool
      */
     public function dispatch(array $params, $request)
@@ -123,8 +133,14 @@ class Evil_Registration
                     for($i = 0; $i < $count; $i++)
                     {
                         $result = call_user_func_array($this->_cfg['dispatch']['filters'][$i], array($result));
-                        if(!$result)
-                            throw new Exception('Filtering failed');
+                        if(!$result || is_string($result))
+                        {
+                            $this->errors[] = array(
+                                "failed"  => $this->_cfg['dispatch']['filters'][$i],
+                                "message" => $result
+                            );
+                            return false;
+                        }
                     }
                 }
 
@@ -179,14 +195,16 @@ class Evil_Registration
      * @param array $params
      * @return array|bool
      * @author Se#
-     * @version 0.0.1
+     * @version 0.0.2
+     * @changeLog
+     * 0.0.2 return message on error
      */
     public static function notEmpty(array $params)
     {
-        foreach($params as $value)
+        foreach($params as $i => $value)
         {
             if(empty($value))
-                return false;
+                return 'Empty "' . $i . '"';
         }
 
         return $params;
@@ -198,7 +216,9 @@ class Evil_Registration
      * @param array $params
      * @return array|bool
      * @author Se#
-     * @version 0.0.1
+     * @version 0.0.2
+     * @changeLog
+     * 0.0.2 return message on error
      */
     public static function confirmPassword(array $params)
     {
@@ -210,7 +230,9 @@ class Evil_Registration
                 return $params;
             }
             else
-                return false;
+                return 'Password and password confirmation is different';
         }
+
+        return $params;
     }
 }
