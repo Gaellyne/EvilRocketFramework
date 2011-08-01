@@ -2,8 +2,9 @@
 /**
  * @description Simplify for a registration action
  * @author Se#
- * @version 0.0.3
+ * @version 0.0.4
  * @changeLog
+ * 0.0.4 notEmpty()
  * 0.0.3 see dispatch() v.0.0.2
  * 0.0.2 dispatch()
  */
@@ -167,6 +168,25 @@ class Evil_Registration
 
         if(isset($params['submit']))
             unset($params['submit']);
+
+        return $params;
+    }
+
+    /**
+     * @description check for an emptiness
+     * @static
+     * @param array $params
+     * @return array|bool
+     * @author Se#
+     * @version 0.0.1
+     */
+    public static function notEmpty(array $params)
+    {
+        foreach($params as $value)
+        {
+            if(empty($value))
+                return false;
+        }
 
         return $params;
     }
