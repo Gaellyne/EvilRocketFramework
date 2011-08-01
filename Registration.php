@@ -2,8 +2,9 @@
 /**
  * @description Simplify for a registration action
  * @author Se#
- * @version 0.0.4
+ * @version 0.0.5
  * @changeLog
+ * 0.0.5 confirmPassword()
  * 0.0.4 notEmpty()
  * 0.0.3 see dispatch() v.0.0.2
  * 0.0.2 dispatch()
@@ -189,5 +190,27 @@ class Evil_Registration
         }
 
         return $params;
+    }
+
+    /**
+     * @description check password confirmation
+     * @static
+     * @param array $params
+     * @return array|bool
+     * @author Se#
+     * @version 0.0.1
+     */
+    public static function confirmPassword(array $params)
+    {
+        if(isset($params['password']) && isset($params['confirmPassword']))
+        {
+            if($params['password'] == $params['confirmPassword'])
+            {
+                unset($params['confirmPassword']);
+                return $params;
+            }
+            else
+                return false;
+        }
     }
 }
