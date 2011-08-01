@@ -2,7 +2,9 @@
 /**
  * @description Simplify for a registration action
  * @author Se#
- * @version 0.0.1
+ * @version 0.0.2
+ * @changeLog
+ * 0.0.2 dispatch()
  */
 class Evil_Registration
 {
@@ -77,11 +79,80 @@ class Evil_Registration
         return true;
     }
 
+    /**
+     * @description add CAPTCHA to a form
+     * @param string $captchaName
+     * @param array $args
+     * @return void
+     * @author Se#
+     * @version 0.0.1
+     */
     public function useCaptcha($captchaName, $args)
     {
         if(method_exists('Evil_Captcha_' . ucfirst($captchaName), 'challenge'))
         {
             // todo 
         }
+    }
+
+    /**
+     * @description dispatch the request for a registration
+     * @param array $params
+     * @param Zend_Controller_Request_Abstract $request
+     * @return void
+     * @author Se#
+     * @version 0.0.1
+     */
+    public function dispatch(array $params, $request)
+    {
+        if ($request->isPost())
+        {
+            if(isset($this->_cfg['dispatch']['filters']) && is_array($this->_cfg['dispatch']['filters']))
+            {
+                $count  = count($this->_cfg['dispatch']['filters']);
+                $result = $params;
+
+                for($i = 0; $i < $count; $i++)
+                {
+                    $result = call_user_func_array($this->_cfg['dispatch']['filters'][$i], array($result));
+                    if(!$result)
+                        throw new Exception('Filtering failed');
+                }
+            }
+
+            if(isset($this->_cfg['dispatch']['db']) && is_array($this->_cfg['dispatch']['db']))
+            {
+                $result = $this->_clear($result);
+                if(isset($this->_cfg['dispatch']['db']['tableName']))
+                {
+                    $table = new Zend_Db_Table(Evil_DB::scope2table($this->_cfg['dispatch']['db']['tableName']));
+                    $table->insert($result);
+                }
+            }
+        }
+    }
+
+    /**
+     * @description clear params from sys-info
+     * @param array $params
+     * @return array
+     * @author Se#
+     * @version 0.0.1
+     */
+    protected function _clear(array $params)
+    {
+        if(isset($params['action']))
+            unset($params['action']);
+
+        if(isset($params['controller']))
+            unset($params['controller']);
+
+        if(isset($params['module']))
+            unset($params['module']);
+
+        if(isset($params['submit']))
+            unset($params['submit']);
+
+        return $params;
     }
 }
