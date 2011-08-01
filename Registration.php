@@ -2,8 +2,9 @@
 /**
  * @description Simplify for a registration action
  * @author Se#
- * @version 0.0.6
+ * @version 0.0.7
  * @changeLog
+ * 0.0.7 see dispatch() v.0.0.4
  * 0.0.6 error log
  * 0.0.5 confirmPassword()
  * 0.0.4 notEmpty()
@@ -113,8 +114,9 @@ class Evil_Registration
      * @param Zend_Controller_Request_Abstract $request
      * @return bool
      * @author Se#
-     * @version 0.0.3
+     * @version 0.0.4
      * @changeLog
+     * 0.0.4 log db and validation errors
      * 0.0.3 log errors, accept error messages for filters
      * 0.0.2 return bool
      */
@@ -125,42 +127,78 @@ class Evil_Registration
             $this->makeForm();
             if($this->_form->isValid($params))
             {
+                $result = $params;
+
                 if(isset($this->_cfg['dispatch']['filters']) && is_array($this->_cfg['dispatch']['filters']))
                 {
                     $count  = count($this->_cfg['dispatch']['filters']);
-                    $result = $params;
 
                     for($i = 0; $i < $count; $i++)
                     {
                         $result = call_user_func_array($this->_cfg['dispatch']['filters'][$i], array($result));
                         if(!$result || is_string($result))
                         {
-                            $this->errors[] = array(
-                                "failed"  => $this->_cfg['dispatch']['filters'][$i],
-                                "message" => $result
-                            );
+                            $this->error($this->_cfg['dispatch']['filters'][$i], $result);
                             return false;
                         }
                     }
                 }
 
-                if(isset($this->_cfg['dispatch']['db']) && is_array($this->_cfg['dispatch']['db']))
+                if(!$this->_db($result))
                 {
-                    $result = $this->_clear($result);
-                    if(isset($this->_cfg['dispatch']['db']['tableName']))
-                    {
-                        $table = new Zend_Db_Table(Evil_DB::scope2table($this->_cfg['dispatch']['db']['tableName']));
-                        $table->insert($result);
-                    }
-                    else
-                        return false;
+                    $this->error('Db', 'Can not create a row');
+                    return false;
                 }
+            }
+            else
+            {
+                $this->error('Form validation', 'Invalid data');
+                return false;
+            }
+        }
+        else
+            return false;
+
+        return true;
+    }
+
+    /**
+     * @description log inside errors
+     * @param string $from
+     * @param string $message
+     * @return void
+     * @author Se#
+     * @version 0.0.1
+     */
+    public function error($from, $message)
+    {
+        $this->errors[] = array(
+            'failed'  => $from,
+            'message' => $message,
+            'time'    => time()
+        );
+    }
+
+    /**
+     * @description place data into a DB
+     * @param array $result
+     * @return bool
+     * @author Se#
+     * @version 0.0.1
+     */
+    protected function _db($result)
+    {
+        if(isset($this->_cfg['dispatch']['db']) && is_array($this->_cfg['dispatch']['db']))
+        {
+            $result = $this->_clear($result);
+            if(isset($this->_cfg['dispatch']['db']['tableName']))
+            {
+                $table = new Zend_Db_Table(Evil_DB::scope2table($this->_cfg['dispatch']['db']['tableName']));
+                $table->insert($result);
             }
             else
                 return false;
         }
-        else
-            return false;
 
         return true;
     }
