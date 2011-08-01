@@ -41,7 +41,7 @@ class Evil_Registration
         $path = $path ? $path : APPLICATION_PATH . '/configs/forms/registration.' . self::$cfgExtension;
         if(!is_file($path))
             throw new Exception('Missed configuration for a registration');
-
+        // todo fix by extension
         $this->_cfg = json_decode(file_get_contents($path), true);
     }
 
