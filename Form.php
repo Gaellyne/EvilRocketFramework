@@ -2,7 +2,9 @@
 /**
  * @description Form operating
  * @author Se#
- * @version 0.0.3
+ * @version 0.0.4
+ * @changeLog
+ * 0.0.4 fillForm
  */
 class Evil_Form extends Zend_Form
 {
@@ -195,5 +197,25 @@ class Evil_Form extends Zend_Form
         }
 
         return $formConfig;
+    }
+
+    /**
+     * @description fill the form with data
+     * @static
+     * @param array $data
+     * @param Zend_Form $form
+     * @return Zend_Form
+     * @author Se#
+     * @version 0.0.1
+     */
+    public static function fillForm(array $data, Zend_Form $form)
+    {
+        foreach($data as $name => $value)
+        {
+            if(isset($form->$name))
+                $form->$name->setValue($value);
+        }
+
+        return $form;
     }
 }

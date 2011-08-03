@@ -2,8 +2,9 @@
 /**
  * @description Обработчик массивов
  * @author nur, Se#
- * @version 0.0.5
+ * @version 0.0.6
  * @changeLog
+ * 0.0.6 resetKeys()
  * 0.0.5 fixes 
  * 0.0.4 added methods convert and convertLevel2LRKeys
  * 0.0.3 added methods byField and filter
@@ -252,12 +253,13 @@ class Evil_Array
 
         for($i = $index; $i < $count; $i++)
         {
-            if(isset(self::$operated[$i]))// do not operate a row second time
+            if(self::operated($src, $i, true))// do not operate a row second time
                 continue;
 
             if($src[$i][$levelField] > $curLevel)// child
             {
-                self::$operated[$i] = true;
+                self::operated($src, $i);
+                //self::$operated[$i] = true;
                 //$prepared = self::prepareData($src[$i], $needed);
 				self::$_lk++;
 				self::$_rk = self::$_lk+1;
@@ -266,7 +268,7 @@ class Evil_Array
 				$result[$i]['rk'] = self::$_rk;
 
                 // get children for a child
-                $result += self::convertLevel2LRKeys($src, $needed, $src[$i][$levelField], $i+1);
+                $result += self::convertLevel2LRKeys($src, $needed, $src[$i][$levelField], $i+1, $levelField);
 				if(isset($result[$i+1]))
 				{
 					self::$_rk++;
@@ -290,56 +292,83 @@ class Evil_Array
     /**
      * @description convert parentId array to the byLevel array
      * @static
-     * @param array $src
-     * @param string $parentField
-     * @param string $idField
+     * @param array $data
+     * @param int $parentId
+     * @param int $index
+     * @param int $level
+     * @param string $pf parent field
+     * @param string $if  id field
      * @return array
+     * @author Se#
+     * @version 0.0.1
      */
-    public static function convertParentId2Level(array $src, $parentField = 'parent', $idField = 'id')
+    public static function convertParentId2Level(array $data, $parentId = 0, $index = 0, $level = 1, $pf = 'parent', $if = 'id')
     {
-        $result  = array();
-        $byId    = array();
-        $byLevel = array();
-        /**
-         * byId => array(
-         *      1 => array(
-         *          21 => array()
-         *      )
-         * )
-         */
+        $rid = array();
+        $count = count($data);
 
-        $srcCount = count($src);
-
-        for($i = 0; $i < $srcCount; $i++)
+        for($i = $index; $i < $count; $i++)
         {
-            if(!isset($src[$i]) || !isset($src[$i][$idField]) || !isset($src[$i][$parentField]))
-                continue;
+            $row = $data[$i];
 
-            if(isset($byId[$src[$i][$parentField]]))
+            //if(!isset(self::$operated[$row[$if]]))
+            if(!self::operated($data, $row[$if], true))
             {
-                $level = $byId[$src[$i][$parentField]]['level'] + 1;
-                $byId[$src[$i][$parentField]]['children'][] = $src[$i][$idField];
-            }
-            else
-                $level = 1;
-
-            $byId[$src[$i][$idField]] = $src[$i];
-            $byId[$src[$i][$idField]]['level'] = $level;
-            $byId[$src[$i][$idField]]['children'] = array();
-        }
-
-        foreach($byId as $id => $data)
-        {
-            $result[] = $data;
-            if(!empty($data['children']))
-            {
-                foreach($data['children'] as $childId)
+                if($row[$pf] == $parentId)
                 {
-                    // todo
+                    self::operated($data, $row[$if]);
+                    //self::$operated[$row[$if]] = true;
+
+                    $row['level'] = $level;
+                    $rid[] = $row;
+                    $children = self::convertParentId2Level($data, $row[$if], $i+1, $level+1, $pf, $if);
+                    foreach($children as $child)
+                        $rid[] = $child;
                 }
             }
         }
 
-        return $result;
+        return $rid;
+    }
+
+    /**
+     * @description operate operated data
+     * @static
+     * @param mixed $data
+     * @param string $id
+     * @param bool $ask
+     * @return bool
+     * @author Se#
+     * @version 0.0.1
+     */
+    public static function operated($data, $id, $ask = false)
+    {
+        $opId = sha1(json_encode($data));
+
+        if(!isset(self::$operated[$opId]))
+            self::$operated[$opId] = array();
+
+        if(!$ask)
+            self::$operated[$opId][$id] = true;
+        elseif(isset(self::$operated[$opId][$id]))
+            return true;
+        else
+            return false;
+
+        return true;
+    }
+
+    /**
+     * @description reset keys
+     * @param int $left
+     * @param int $right
+     * @return void
+     * @author Se#
+     * @version 0.0.1
+     */
+    public static function resetKeys($left = 0, $right = 0)
+    {
+        self::$_lk = (int) $left;
+        self::$_rk = (int) $right;
     }
 }
