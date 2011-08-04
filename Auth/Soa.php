@@ -21,13 +21,10 @@
         	
         	$config = Zend_Registry::get('config');
         	$config = (is_object($config)) ? $config->toArray() : $config;
-Zend_Debug::dump($controller->getRequest()->isPost(),'$controller->getRequest()->isPost()');
-  
         	// require http post method
             if ($controller->getRequest()->isPost()) {
 
                 $data = $controller->getRequest()->getPost();
-var_dump($data);
                 // FIXME change to 'timeout' => $config['evil']['auth']['soa']['timeout']
                 $timeout = 3000;
 
@@ -46,14 +43,10 @@ var_dump($data);
 	                    'timeout' => $timeout
 	                 )
                 );
-var_dump($call);
                 //$result = $controller->rpc->make($call);
                 //$result = new SOA_Result();
 
                 $result = $this->_makeSOACall($call);
-
-var_dump($result);
-                die();
                 if (SOA_Result::Success == $result->getStatus())
                 {
                     $res = $result->getArgs();
@@ -70,8 +63,6 @@ var_dump($result);
                     );
 
                     $result = $this->_makeSOACall($call);
-Zend_Debug::dump($result,'$result');
-                    die();
                     if (SOA_Result::Success == $result->getStatus())
                     {
                         $res = $result->getArgs();
