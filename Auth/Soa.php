@@ -47,14 +47,16 @@
                 );
 
                 //$result = $controller->rpc->make($call);
-                $result = $this->_makeSOACall($controller, $call);
+                //$result = new SOA_Result();
 
-                if (isset($result['result'][0]) 
-                    && $result['result'][0] == 'Success'
-                    && isset($result['result'][2]['key'])
-                ) {
-                    $key = $result['result'][2]['key'];
-                    
+                $result = $this->_makeSOACall($call);
+
+                
+                if (SOA_Result::Success == $result->getStatus())
+                {
+                    $res = $result->getArgs();
+                    $key = $res['key'];
+
                     // get user info
                     $call = array(
 	                	'service' => 'Auth', // FIXME $namespace
@@ -65,15 +67,13 @@
 	                    )
                     );
 
-                    $result = $this->_makeSOACall($controller, $call);;
-                    
-                    if (isset($result['result'][0]) 
-                        && $result['result'][0] == 'Success'
-                        && isset($result['result'][2]['user']))
+                    $result = $this->_makeSOACall($call);
+
+                    if (SOA_Result::Success == $result->getStatus())
                     {
-                        // insert into local users table
-                        $user = $result['result'][2]['user'];
-                        // FIXME $role = (empty($user['role']) ? $config['evil']['auth']['soa']['defaultrole'] : $user['role']);
+                        $res = $result->getArgs();
+                        $user = isset($res['user']) ? $res['user'] : array();
+
                         $role = (empty($user['role']) ? 'citizen' : $user['role']);
                         $login = $user['login'];                        
                         
@@ -138,9 +138,9 @@
         	$config = Zend_Registry::get('config');
         	$config = (is_object($config)) ? $config->toArray() : $config;
 
-        	if (!isset($controller->rpc)) {
-        	    throw new Evil_Exception('RPC not specified in controller');
-        	}
+        //	if (!isset($controller->rpc)) {
+        //	    throw new Evil_Exception('RPC not specified in controller');
+        //	}
         	        	
         	if (isset($config['evil']['auth']['soa']['view']) &&
                 !empty($config['evil']['auth']['soa']['view'])
@@ -211,7 +211,7 @@
                 	'method' => 'keyBreak',
                     'data' => array('key' => $key)
                 );
-                $result = $this->_makeSOACall($controller, $call);
+                $result = $this->_makeSOACall($call);
 
                 // FIXME if result is not Success must we remove row from users?
 //                if (isset($result['result'][0]) 
@@ -235,18 +235,9 @@
             // TODO: Implement onSuccess() method.
         }
 
-        protected function _makeSOACall($controller, $call)
+        protected function _makeSOACall($call)
         {
-            if (is_callable($controller->rpc)) {
-                $rpc = $controller->rpc;
-                return call_user_func($rpc, $call);
-            }
-
-            if (is_object($controller->rpc) && is_callable(array($controller->rpc, 'make'))) {
-                return $controller->rpc->make($call);
-            }
-
-            return array();
+          return SOA_Call::make($call);
         }
 
     }

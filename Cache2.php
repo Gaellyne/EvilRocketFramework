@@ -37,6 +37,11 @@ class Evil_Cache2
 
     protected static function _getBackendClass($object)
     {
+        if (gettype($object) == 'array' || gettype($object) == 'string' || gettype($object) == 'integer' || gettype($object) == 'double' || gettype($object) == 'boolean')
+        {
+            return 'Evil_Cache_Redis';
+        }
+        
         return 'Evil_Cache_Pull';
     }
     protected static function _getBackend($object)
