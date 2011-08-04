@@ -50,22 +50,13 @@ class Evil_Avr{
 		'totalQuantity'=>'',
 		'totalPrice'=>'',
 
-		'table'=>array(
-		    array(
-			'byOrder'=>'',
-			'byOutlay'=>'',
-			'workName'=>'',
-			'unitPriceNumber'=>'',
-			'measurement'=>'',
-			'quantity'=>'',
-			'unitPrice'=>'',
-			'price'=>''
-		    )
-		),
+		'table'=>array(),
 		'personWhoGiveTranscript'=>'','personWhoGiveOfficialCapacity'=>'',
 		'personWhoTakeTranscript'=>'','personWhoTakeOfficialCapacity'=>''
 	    );
 	    $params=array_merge($default,$params);
+	    while(sizeof($params['table'])<10)
+		$params['table'][]=array('byOrder'=>'','byOutlay'=>'','workName'=>'','unitPriceNumber'=>'','measurement'=>'','quantity'=>'','unitPrice'=>'','price'=>'');
 	    $zip->Open(dirname(__FILE__).'/Avr/origin.odt');$zip->FileReplace('content.xml', Evil_Avr::_avrDocument($params), TBSZIP_STRING);
 	    $zip->Flush(TBSZIP_FILE, $filename);
 	    $zip->Close();
@@ -108,9 +99,6 @@ $avrParam['contractNumber'].'</text:span></text:p></table:table-cell><table:cove
 $avrParam['reportingPeriodTo'].'</text:span></text:p></table:table-cell><table:covered-table-cell/></table:table-row><table:table-row table:style-name="Table2.3"><table:table-cell table:style-name="Table2.A1" table:number-columns-spanned="7" office:value-type="string"><text:p text:style-name="P22">О ПРИЕМКЕ ВЫПОЛНЕННЫХ РАБОТ</text:p></table:table-cell><table:covered-table-cell/><table:covered-table-cell/><table:covered-table-cell/><table:covered-table-cell/><table:covered-table-cell/><table:covered-table-cell/></table:table-row></table:table><text:p text:style-name="Standard"/><table:table table:name="Table3" table:style-name="Table3"><table:table-column table:style-name="Table3.A"/><table:table-column table:style-name="Table3.B"/><table:table-column table:style-name="Table3.C"/><table:table-row table:style-name="Table3.1"><table:table-cell table:style-name="Table3.A1" office:value-type="string"><text:p text:style-name="P9">Сметная (договорная) стоимость в соответствии с договором подряда (субподряда)</text:p></table:table-cell><table:table-cell table:style-name="Table3.B1" office:value-type="string"><text:p text:style-name="P28"><text:span text:style-name="T4">'.$avrParam['outlayPrice'].'</text:span></text:p></table:table-cell><table:table-cell table:style-name="Table3.A1" office:value-type="string"><text:p text:style-name="P9"><text:s/>руб.</text:p></table:table-cell></table:table-row></table:table><text:p text:style-name="Standard"/>';
 		$avrTable='';
 		$avrTableRowsCount=sizeof($avrParam['table']);
-		if($avrTableRowsCount<4)
-			for($i=$avrTableRowsCount;$i<4;$i++)
-				$avrParam['table'][$i]=array('byOrder'=>'','byOutlay'=>'','workName'=>'','unitPriceNumber'=>'','measurement'=>'','quantity'=>'','unitPrice'=>'','price'=>'');
 		if($avrTableRowsCount<5)
 			$avrTable.=Evil_Avr::_avrTable($avrParam['table'],0,4,array('totalQuantity'=>$avrParam['totalQuantity'],'totalPrice'=>$avrParam['totalPrice'])).Evil_Avr::_avrPageNumber(2);
 		else{
