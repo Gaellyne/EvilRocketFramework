@@ -95,6 +95,7 @@ class Evil_Json_Rpc
                 'timeout'      => 300,
                 'useragent'    => 'Evil_Json_Rpc'
             );
+            var_dump(self::$rpcUrl);
             $client = new Zend_Http_Client(self::$rpcUrl);
             $client->setConfig($options);
         }
