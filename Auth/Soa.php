@@ -231,9 +231,10 @@
 
         protected function _makeSOACall($call)
         {
-            var_dump($call);
-           
-          return SOA_Call::make($call);
+          var_dump($call);
+          $response = SOA_Call::make($call);
+          var_dump($response);
+          return $response;
         }
 
     }
