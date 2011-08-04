@@ -241,7 +241,12 @@ function myErrorHandler($errno, $errstr, $errfile, $errline)
         {
           var_dump($call);
             set_error_handler("myErrorHandler");
-          $response = SOA_Call::make($call);
+            try {
+             $response = SOA_Call::make($call);
+            } catch (Exception $e)
+                               {
+                                   var_dump($e);
+                               }
           var_dump($response);
           return $response;
         }
