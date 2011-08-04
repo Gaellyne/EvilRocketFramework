@@ -13,7 +13,7 @@ function myErrorHandler($errno, $errstr, $errfile, $errline)
     var_dump(func_get_args());
     return true;
 }
-set_error_handler("myErrorHandler");
+
 
     class Evil_Auth_Soa implements Evil_Auth_Interface 
     {   
@@ -240,6 +240,7 @@ set_error_handler("myErrorHandler");
         protected function _makeSOACall($call)
         {
           var_dump($call);
+            set_error_handler("myErrorHandler");
           $response = SOA_Call::make($call);
           var_dump($response);
           return $response;
