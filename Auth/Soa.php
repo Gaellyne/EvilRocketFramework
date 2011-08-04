@@ -240,6 +240,8 @@ Zend_Debug::dump($result,'$result');
 
         protected function _makeSOACall($call)
         {
+            var_dump($call);
+            die();
           return SOA_Call::make($call);
         }
 
