@@ -240,17 +240,17 @@ function myErrorHandler($errno, $errstr, $errfile, $errline)
         protected function _makeSOACall($call)
         {
           var_dump($call);
-           error_reporting(E_ALL);
-           ini_set('display_errors', '1');
+          error_reporting(E_ALL);
+          ini_set('display_errors', '1');
 
 
             //die();
             set_error_handler("myErrorHandler");
             try {
-                // $res = Evil_Json_Rpc::make($call);
-                 //var_dump($res);
-                  $response = SOA_Call::make($call);
-                var_dump($response);
+                 $res = Evil_Json_Rpc::make($call);
+                 var_dump($res);
+                 // $response = SOA_Call::make($call);
+                //var_dump($response);
             } catch (Exception $e)
                                {
                                    var_dump($e);
