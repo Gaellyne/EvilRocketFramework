@@ -104,7 +104,7 @@ class Evil_Json_Rpc
         $requestParams = array(
     						'method' => $methodName,
     						'params' => $params,
-                            'id' => $requestId++
+                            'id' => self::$_requestId++
 						);
 						
 		$request = Zend_Json::encode($requestParams);
