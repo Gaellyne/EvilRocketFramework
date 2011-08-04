@@ -247,9 +247,10 @@ function myErrorHandler($errno, $errstr, $errfile, $errline)
             //die();
             set_error_handler("myErrorHandler");
             try {
-                 $res = Evil_Json_Rpc::make($call);
-                 var_dump($res);
-           //  $response = SOA_Call::make($call);
+                // $res = Evil_Json_Rpc::make($call);
+                 //var_dump($res);
+                  $response = SOA_Call::make($call);
+                var_dump($response);
             } catch (Exception $e)
                                {
                                    var_dump($e);
