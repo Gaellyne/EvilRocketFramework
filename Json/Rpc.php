@@ -90,7 +90,13 @@ class Evil_Json_Rpc
                 
                 self::$rpcUrl = isset($config['jsonrpc']['url']) ? $config['jsonrpc']['url'] :null;
             }
-             $client = new Zend_Http_Client(self::$rpcUrl);
+            $options = array(
+                'maxredirects' => 5,
+                'timeout'      => 300,
+                'useragent'    => 'Evil_Json_Rpc'
+            );
+            $client = new Zend_Http_Client(self::$rpcUrl);
+            $client->setConfig($options);
         }
        
         $requestParams = array(
@@ -102,11 +108,12 @@ class Evil_Json_Rpc
 		$request = Zend_Json::encode($requestParams);
 		$client->setHeaders('Content-type','application/json');
 		$client->setRawData($request);
+		$response = $client->request('POST');
 		try {
-		    return Zend_Json::decode($client->request('POST')->getBody());
+		    return Zend_Json::decode($response->getBody());
 		} catch (Exception $e)
 		{
-		    return array('ex' => $e->__toString(),'response' => $client->request('POST')->getBody());
+		    return array('ex' => $e->__toString(),'response' => $response->getBody());
 		}
 		
     }

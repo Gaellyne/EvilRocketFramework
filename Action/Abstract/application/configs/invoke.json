@@ -27,10 +27,6 @@
         },
         {
             "class"  : "Evil_Action_Abstract",
-            "method" : "autoLoad"
-        },
-        {
-            "class"  : "Evil_Action_Abstract",
             "method" : "table",
             "field"  : "table"
         },
@@ -64,6 +60,8 @@
         "configs" : "application/configs/",
         "views"   : "application/views/scripts/"
     },
+
+    "named" : true,
 
     "autoLoad" :
     [

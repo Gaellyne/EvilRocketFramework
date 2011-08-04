@@ -3,7 +3,9 @@
  * @description Abstract action, use default config if there is no personal,
  * use default view if there is no personal view
  * @author Se#
- * @version 0.0.5
+ * @version 0.0.9
+ * @changeLog
+ * 0.0.9 named class-method in invoke (see _prepareArgsFromConfig)
  */
 abstract class Evil_Action_Abstract implements Evil_Action_Interface
 {
@@ -44,11 +46,12 @@ abstract class Evil_Action_Abstract implements Evil_Action_Interface
             if(isset($invokeConfig['method-to-variable']))
             {// get args
                 $args = func_get_args();
+                $named = (!isset($invokeConfig['named']) || !$invokeConfig['named']) ? false : true;
 
                 // operate
                 foreach($invokeConfig['method-to-variable'] as $variable)
                 {// method can be a string (function) or an array (class, method)
-                    list($method, $field) = $this->_prepareArgsFromConfig($variable);
+                    list($method, $field) = $this->_prepareArgsFromConfig($variable, $named);
      
                     $result = $args;
                     // check method existing
@@ -70,25 +73,34 @@ abstract class Evil_Action_Abstract implements Evil_Action_Interface
     /**
      * @description get invoke config, may get personal for controller & action
      * @static
-     * @return array|mixed
+     * @return array
      * @author Se#
-     * @version 0.0.2
+     * @version 0.0.4
      */
     public static function getInvokeConfig($params)
     {
         $personalPath = APPLICATION_PATH . '/configs/evil/invoke.json';
         $generalPath  = __DIR__ . '/Abstract/application/configs/invoke.json';
-        // decide what config get
-        $path   = file_exists($personalPath) ? $personalPath : (file_exists($generalPath) ? $generalPath : false);
-        $config = $path ? json_decode(file_get_contents($path), true) : false;
+        $config       = is_file($generalPath) ? json_decode(file_get_contents($generalPath), true) : array();
 
-        // if there is personal config for current controller
-        if(isset($params['controller']) && is_array($config) && isset($config[$params['controller']]))
+        if(is_file($personalPath))
         {
-            $config = $config[$params['controller']];
-            // if there is personal config for current action
-            if(isset($params['action']) && isset($config[$params['action']]))
-                $config = $config[$params['action']];
+            $pConfig = json_decode(file_get_contents($personalPath), true);
+            // if there is personal config for current controller
+            if(isset($params['controller']) && is_array($pConfig) && isset($pConfig[$params['controller']]))
+            {
+                // if there is personal config for current action
+                if(isset($params['action']) &&
+                   isset($pConfig[$params['controller']][$params['action']]) &&
+                   isset($pConfig[$params['controller']][$params['action']]['method-to-variable']))
+                {
+                    $config = $pConfig[$params['controller']][$params['action']];
+                }
+                elseif(isset($pConfig[$params['controller']]['method-to-variable']))
+                    $config = $pConfig[$params['controller']];
+            }
+            elseif(isset($pConfig['method-to-variable']))
+                $config = $pConfig;
         }
 
         return $config;
@@ -234,19 +246,29 @@ abstract class Evil_Action_Abstract implements Evil_Action_Interface
     /**
      * @description decide in what class should call a method
      * @param array|string $args
+     * @param bool $named
      * @return array
      * @author Se#
      * @version 0.0.2
      */
-    protected function _prepareArgsFromConfig($args)
+    protected function _prepareArgsFromConfig($args, $named = true)
     {
         if(is_string($args))
             return array($args, null);
         elseif(is_array($args))
         {
-            $class    = isset($args['class'])  ? $args['class']  : get_class($this);
-            $method   = isset($args['method']) ? $args['method'] : 'get';
-            $field    = isset($args['field'])  ? $args['field']  : null;
+            if($named)
+            {
+                $class    = isset($args['class'])  ? $args['class']  : get_class($this);
+                $method   = isset($args['method']) ? $args['method'] : 'get';
+                $field    = isset($args['field'])  ? $args['field']  : null;
+            }
+            else
+            {
+                $class    = isset($args[0])  ? $args[0] : get_class($this);
+                $method   = isset($args[1])  ? $args[1] : 'get';
+                $field    = isset($args[2])  ? $args[2] : null;
+            }
 
             return array(array($class, $method), $field);
         }
@@ -300,7 +322,7 @@ abstract class Evil_Action_Abstract implements Evil_Action_Interface
         else
             $formConfig = $config[$action]['form'];
 
-        return $this->_defaultFormValues($formConfig);
+        return Evil_Form::callback($formConfig, 'default');
     }
 
     protected function _applyDefault($config, $action)
@@ -336,30 +358,6 @@ abstract class Evil_Action_Abstract implements Evil_Action_Interface
         }
 
         return $actConfig;
-    }
-
-    /**
-     * @description operate options : {"default" : ... }
-     * @param array $formConfig
-     * @return
-     * @author Se#
-     * @version 0.0.1
-     */
-    protected function _defaultFormValues($formConfig)
-    {
-        $elements = isset($formConfig['elements']) ? $formConfig['elements'] : array();
-
-        foreach($elements as $name => $config)
-        {
-            if(isset($config['options']['default']))
-            {
-                $formConfig['elements'][$name]['options']['value'] = call_user_func_array($config['options']['default'],
-                                                                                          array($formConfig['elements'][$name]));
-                unset($formConfig['elements'][$name]['options']['default']);
-            }
-        }
-
-        return $formConfig;
     }
 
     /**
@@ -453,21 +451,13 @@ abstract class Evil_Action_Abstract implements Evil_Action_Interface
 
     /**
      * @description If view not exists, render default
-     * @param object $controller
-     * @param string $action
-     * @return void
+     * @return void|bool
      * @author Se#
      * @version 0.0.3
      */
     public function ifViewNotExistsRenderDefault()
     {
         $controller = self::getStatic('controller');
-
-        if(!isset($controller->view->evilAutoloads))
-            $controller->view->evilAutoloads = array();
-        
-        if($this->_skipFunction(__FUNCTION__))
-            return true;
 
         // construct view path
         $viewPath = APPLICATION_PATH . '/views/scripts/' . $controller->getHelper('viewRenderer')->getViewScript();
@@ -641,77 +631,19 @@ abstract class Evil_Action_Abstract implements Evil_Action_Interface
             if($columnScheme['PRIMARY'])// don't show if primary key
                 continue;
 
-            $typeOptions = $this->_getFieldType($columnScheme['DATA_TYPE']);// return array('type'[, 'options'])
+            $typeOptions = Evil_Form::getFieldType($columnScheme['DATA_TYPE']);// return array('type'[, 'options'])
 
             $attrOptions = array('label' => ucfirst($columnName));
             if(isset($actionConfig['default']))
                 $attrOptions += $actionConfig['default'];
 
-            $options = $this->_setFormField($options, $columnName, $attrOptions, $typeOptions);
+            $options = Evil_Form::setFormField($options, $columnName, $attrOptions, $typeOptions);
         }
 
         $options['elements']['do']     = array('type' => 'hidden', 'options' => array('value' => $action));// add submit button
         $options['elements']['submit'] = array('type' => 'submit');// add submit button
 
         return $options;
-    }
-
-    /**
-     * @description set form field
-     * @param array $options
-     * @param string $columnName
-     * @param array $attrOptions
-     * @param array $typeOptions
-     * @return
-     * @author Se#
-     * @version 0.0.1
-     */
-    protected function _setFormField($options, $columnName, $attrOptions, $typeOptions)
-    {
-        if(isset($options['elements'][$columnName]) && ('ignore' == $options['elements'][$columnName]))
-            unset($options['elements'][$columnName]);
-        else
-        {
-            if(isset($options['elements'][$columnName]))
-            {
-                $options['elements'][$columnName]['type'] = isset($options['elements'][$columnName]['type']) ?
-                        $options['elements'][$columnName]['type'] :
-                        $typeOptions[0];
-
-                $options['elements'][$columnName]['options'] = isset($options['elements'][$columnName]['options']) ?
-                        $options['elements'][$columnName]['options'] + $attrOptions :
-                        $attrOptions;
-            }
-            else
-            {
-                $options['elements'][$columnName] = array(
-                    'type' => $typeOptions[0],
-                    'options' =>  $attrOptions
-                );
-            }
-
-            if(isset($typeOptions[1]))// if there is some additional options, merge it with the basic options
-                $options['elements'][$columnName]['options'] += $typeOptions[1];
-        }
-
-        return $options;
-    }
-
-    /**
-     * @description convert mysql type to the HTML-type and add (if it needs) options for the HTML-type
-     * @param string $type
-     * @return array
-     * @author Se#
-     * @version 0.0.1
-     */
-    protected function _getFieldType($type)
-    {
-        switch($type)
-        {
-            case 'text' : return array('textarea', array('rows' => 5));
-            case 'int'  : return array('text');
-            default     : return array('text');
-        }
     }
 
     /**
@@ -788,15 +720,6 @@ abstract class Evil_Action_Abstract implements Evil_Action_Interface
         }
 
         return $root;
-    }
-
-    public static function partial($controllerName, $actionName, $actionDo = 'default')
-    {
-        $link = 'http://' . $_SERVER['SERVER_NAME'] . '/'
-                                  . $controllerName . '/' . $actionName . '/do/' . $actionDo . '/partial/yes';
-
-        $data = file_get_contents($link);
-        return $data;
     }
 
     /**

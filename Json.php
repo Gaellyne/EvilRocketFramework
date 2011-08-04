@@ -88,7 +88,9 @@ class Evil_Json
             $this->_jsonArray  = $json;
         else
             $this->_jsonArray  = json_decode(json_encode($json), true);
-
+		
+        if (is_null($this->_jsonArray))
+        	throw new Exception('Input Json is not valid'. $json);    
         $this->_config = empty($config) ? $this->_config : $config + $this->_config;
         // fetch comments
         $this->_fetchComments();
@@ -138,21 +140,44 @@ class Evil_Json
         
         return isset($this->_jsonArray[$field]) ? $this->_jsonArray[$field] = $value : null;
     }
+    
+    /**
+     * Заменяет текущий Json новым,
+     * переданым в качестве массива
+     * @param $array
+     * @return Successful bool 
+     * @author Sergey Bukharov
+     */
+    public function __setNewJson($array)
+    {
+        if(true == $this->_config['readOnly'])
+            return null;
+        
+       	if (!is_array($array)) return null;
+       	$this->_jsonArray = $array;
+       	return true;	
+    }
 
     /**
      * Save current json to the file
      *
      * @param string $path
+     * @param bool Save to human friend view
      * @return void
      */
-    public function save($path = '')
+    public function save($path = '', $human_friend_format = false)
     {
         // TODO: save comments too!
         $path = empty($path) ? $this->_path : $path;
 
         $f = fopen($path, "w+t");
-
-        return fputs($f, $this->toString()) && fclose($f) ? true : false;
+		
+        //конвертировать в человекочитаемый вид?
+        $json_content = $this->toString();
+        if ($human_friend_format){
+        	$json_content = $this->indent($json_content);
+        }
+        return fputs($f, $json_content) && fclose($f) ? true : false;
     }
 
     /**
@@ -222,4 +247,60 @@ class Evil_Json
             return $tmp;
         }
     }
+    
+    /**
+     * Форматирует JSON код из портянки в человекочитаемый
+     * @param string of JSON $json
+     * @author Sergey Bukharov
+     */
+	protected function indent($json) {
+	
+	    $result      = '';
+	    $pos         = 0;
+	    $strLen      = strlen($json);
+	    $indentStr   = '  ';
+	    $newLine     = "\n";
+	    $prevChar    = '';
+	    $outOfQuotes = true;
+	
+	    for ($i=0; $i<=$strLen; $i++) {
+	
+	        // Смотрим следующий символ в строке
+	        $char = substr($json, $i, 1);
+	
+	        // Are we inside a quoted string?
+	        if ($char == '"' && $prevChar != '\\') {
+	            $outOfQuotes = !$outOfQuotes;
+	        
+	        // If this character is the end of an element, 
+	        // output a new line and indent the next line.
+	        } else if(($char == '}' || $char == ']') && $outOfQuotes) {
+	            $result .= $newLine;
+	            $pos --;
+	            for ($j=0; $j<$pos; $j++) {
+	                $result .= $indentStr;
+	            }
+	        }
+	        
+	        // Add the character to the result string.
+	        $result .= $char;
+	
+	        // If the last character was the beginning of an element, 
+	        // output a new line and indent the next line.
+	        if (($char == ',' || $char == '{' || $char == '[') && $outOfQuotes) {
+	            $result .= $newLine;
+	            if ($char == '{' || $char == '[') {
+	                $pos ++;
+	            }
+	            
+	            for ($j = 0; $j < $pos; $j++) {
+	                $result .= $indentStr;
+	            }
+	        }
+	        
+	        $prevChar = $char;
+	    }
+	
+	    return $result;
+		}    
 }
