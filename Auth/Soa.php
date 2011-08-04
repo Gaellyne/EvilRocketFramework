@@ -51,7 +51,7 @@
 
                 $result = $this->_makeSOACall($call);
 
-                
+Zend_Debug::dump($result,'$result');
                 if (SOA_Result::Success == $result->getStatus())
                 {
                     $res = $result->getArgs();
@@ -68,7 +68,7 @@
                     );
 
                     $result = $this->_makeSOACall($call);
-
+Zend_Debug::dump($result,'$result');
                     if (SOA_Result::Success == $result->getStatus())
                     {
                         $res = $result->getArgs();
@@ -150,14 +150,14 @@
         	else {
         	    // FIXME
         	    /*
-        		$form = new Evil_Auth_Form_Native();           
+        		$form = new Evil_Auth_Form_Native();
         		$controller->view->form = $form;
-        		
+
 	            if ($controller->getRequest()->isPost())
 	                if ($form->isValid($_POST))
 	                {
 	                    $data = $form->getValues();
-	                    
+
 	                    $call = array(
 	                        'service' => 'Auth',
 	                        'method' => 'keyGet',
@@ -169,7 +169,7 @@
 	                        )
 	                    );
 	                    $result = $this->_makeSOACall($controller, $call);
-	
+
 	                    print __METHOD__ . "\n";
 	                    var_dump($result);
 	                }
