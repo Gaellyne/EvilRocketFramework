@@ -242,12 +242,14 @@ function myErrorHandler($errno, $errstr, $errfile, $errline)
           var_dump($call);
            error_reporting(E_ALL);
            ini_set('display_errors', '1');
-            $res = Evil_Json_Rpc::make($call);
-            var_dump($res);
-            die();
+
+
+            //die();
             set_error_handler("myErrorHandler");
             try {
-             $response = SOA_Call::make($call);
+                 $res = Evil_Json_Rpc::make($call);
+                 var_dump($res);
+           //  $response = SOA_Call::make($call);
             } catch (Exception $e)
                                {
                                    var_dump($e);
