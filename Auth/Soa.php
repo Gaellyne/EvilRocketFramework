@@ -6,15 +6,6 @@
  * Class: Evil_Auth_Soa
  * Description:
  */
-
-function myErrorHandler($errno, $errstr, $errfile, $errline)
-{
-
-    var_dump(func_get_args());
-    return true;
-}
-
-
     class Evil_Auth_Soa implements Evil_Auth_Interface 
     {   
     	/**
@@ -239,24 +230,7 @@ function myErrorHandler($errno, $errstr, $errfile, $errline)
 
         protected function _makeSOACall($call)
         {
-          var_dump($call);
-          error_reporting(E_ALL);
-          ini_set('display_errors', '1');
-
-
-            //die();
-            set_error_handler("myErrorHandler");
-            try {
-                 $res = Evil_Json_Rpc::make($call);
-                 var_dump($res);
-                 // $response = SOA_Call::make($call);
-                //var_dump($response);
-            } catch (Exception $e)
-                               {
-                                   var_dump($e);
-                               }
-          var_dump($response);
-          return $response;
+            return SOA_Call::make($call);
         }
 
     }
