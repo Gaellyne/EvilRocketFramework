@@ -21,7 +21,8 @@
         	
         	$config = Zend_Registry::get('config');
         	$config = (is_object($config)) ? $config->toArray() : $config;
-
+Zend_Debug::dump($controller->getRequest()->isPost(),'$controller->getRequest()->isPost()');
+            die();
         	// require http post method
             if ($controller->getRequest()->isPost()) {
 
