@@ -51,7 +51,7 @@
 
                 $result = $this->_makeSOACall($call);
 
-Zend_Debug::dump($result,'$result');
+//Zend_Debug::dump($result,'$result');
                 if (SOA_Result::Success == $result->getStatus())
                 {
                     $res = $result->getArgs();
@@ -68,7 +68,7 @@ Zend_Debug::dump($result,'$result');
                     );
 
                     $result = $this->_makeSOACall($call);
-Zend_Debug::dump($result,'$result');
+//Zend_Debug::dump($result,'$result');
                     if (SOA_Result::Success == $result->getStatus())
                     {
                         $res = $result->getArgs();
