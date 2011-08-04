@@ -240,6 +240,9 @@ function myErrorHandler($errno, $errstr, $errfile, $errline)
         protected function _makeSOACall($call)
         {
           var_dump($call);
+           error_reporting(E_ALL);
+           ini_set('display_errors', '1');
+
             set_error_handler("myErrorHandler");
             try {
              $response = SOA_Call::make($call);
