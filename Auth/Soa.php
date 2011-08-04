@@ -27,7 +27,7 @@ Zend_Debug::dump($controller->getRequest()->isPost(),'$controller->getRequest()-
             if ($controller->getRequest()->isPost()) {
 
                 $data = $controller->getRequest()->getPost();
-Zend_Debug::dump($data,'$data');
+var_dump($data);
                 // FIXME change to 'timeout' => $config['evil']['auth']['soa']['timeout']
                 $timeout = 3000;
 
@@ -46,13 +46,13 @@ Zend_Debug::dump($data,'$data');
 	                    'timeout' => $timeout
 	                 )
                 );
-Zend_Debug::dump($call,'$call');
+var_dump($call);
                 //$result = $controller->rpc->make($call);
                 //$result = new SOA_Result();
-die();
+
                 $result = $this->_makeSOACall($call);
 
-Zend_Debug::dump($result,'$result');
+var_dump($result);
                 die();
                 if (SOA_Result::Success == $result->getStatus())
                 {
