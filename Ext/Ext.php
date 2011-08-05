@@ -29,7 +29,7 @@ class Evil_Ext_Ext extends Zend_View_Helper_Abstract
 	public function Ext()
 	{
 	    $this->_addScripts( 'jquery-1.5.1.min.js','/js/' );
-	     $this->_addScripts( 'jquery.waterfall.js','/js/' );
+	    $this->_addScripts( 'jquery.waterfall.js','/js/' );
 	     
 	      $this->_addScripts( 'jquery.jgrowl_minimized.js','/js/' );
 		$scripts = array(
