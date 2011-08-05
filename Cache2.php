@@ -16,7 +16,6 @@ class Evil_Cache2
     {
         $back = explode(':', $hash);
         $back = $back[0];
-        
         $backend = $back::getInstance(array());
 
         return $backend->get($hash);

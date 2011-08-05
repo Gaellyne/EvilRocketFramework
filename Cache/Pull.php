@@ -39,7 +39,7 @@ class Evil_Cache_Pull implements Evil_Cache_Interface
      */
     public function get($key)
     {
-       return isset($this->_pull[$key]) ? $this->_pull[$key] : null;
+         return isset($this->_pull[$key]) ? $this->_pull[$key] : null;
     }
 
     /**
