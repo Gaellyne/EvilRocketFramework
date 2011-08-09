@@ -14,10 +14,13 @@ class Evil_Cache2
 
     public static function get($hash)
     {
-        $back = explode(':', $hash);
-        $back = $back[0];
-        $backend = $back::getInstance(array());
+        $data = explode(':', $hash,2);
 
+        $back = $data[0];
+        $hash = $data[1];
+
+        $backend = $back::getInstance(array());
+      //  file_put_contents('/tmp/hash.log', var_export($hash,true) . PHP_EOL, FILE_APPEND);
         return $backend->get($hash);
     }
 
@@ -29,13 +32,25 @@ class Evil_Cache2
      */
     public static function put(&$object,$hash = null)
     {
+      //  var_dump($hash);
         $hash = (null == $hash) ? self::getHash(&$object) : $hash;
+
+       // var_dump($object);
+        //die('23');
+        $data =explode(':' ,$hash,2);
+        $key = $data[1];
         $backend = self::_getBackend(&$object);
-        self::_saveToCache($hash, &$object, $backend);
+       // var_dump($backend);
+       // die();
+        $backend->put($key,&$object);
+       // self::_saveToCache($hash, &$object, $backend);
     }
 
     protected static function _getBackendClass(&$object)
     {
+
+       // file_put_contents('/tmp/getbackend.log',var_export($object,true),FILE_APPEND);
+
         if (gettype($object) == 'array' || gettype($object) == 'string')
         {
             return 'Evil_Cache_Redis';
@@ -57,7 +72,7 @@ class Evil_Cache2
      * @param $backend - бекенд
      * @return bool
      */
-    protected function _saveToCache($hash, &$object, $backend)
+    protected function _saveToCache($hash, &$object, &$backend)
     {
         $backend->put($hash, &$object);
         return true;
@@ -72,8 +87,8 @@ class Evil_Cache2
     public static function getHash(&$object)
     {
         $backend = self::_getBackendClass(&$object);
-        //return $backend . ':' . md5(json_encode($object, true));
-        return $backend . ':' . md5(serialize($object));
+        return $backend . ':' . md5(json_encode($object, true));
+        //return $backend . ':' . md5(serialize($object));
     }
 
 }

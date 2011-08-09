@@ -14,9 +14,7 @@ class Evil_Cache_Redis implements Evil_Cache_Interface
                 'Core',
                 'Rediska_Zend_Cache_Backend_Redis',
                 array(
-                    'lifetime' => (isset($call['Cache']) &&
-                                    !empty($call['Cache']['lifetime'])) &&
-                                    is_numeric($call['Caching']['lifetime']) ? $call['Caching']['lifetime'] : 120,
+                    'lifetime' =>  120,
                     'automatic_serialization' => true,
                     ),
                 array(
@@ -52,8 +50,14 @@ class Evil_Cache_Redis implements Evil_Cache_Interface
      */
     public function get($key)
     {
+        //var_dump($key);
+      //  die();
+      //  file_put_contents('/tmp/red.log',$key . PHP_EOL,FILE_APPEND);
+        
         if (($result = self::$_cache->load($key)) !== false)
         {
+          //  $exportData = var_export($result,true) . PHP_EOL;
+          //  file_put_contents('/tmp/red.log',$exportData,FILE_APPEND);
             return $result;
         }
         else
@@ -70,7 +74,12 @@ class Evil_Cache_Redis implements Evil_Cache_Interface
      */
     public function put($key, $object)
     {
-       self::$_cache->save($object, $key);
+    //  var_dump($key);
+     //   file_put_contents('/tmp/put.log',var_export($key,true),FILE_APPEND);
+      $data = explode(':',$key,2);
+      $key = $data[1];
+
+      self::$_cache->save($object, $key);
     }
 
 
