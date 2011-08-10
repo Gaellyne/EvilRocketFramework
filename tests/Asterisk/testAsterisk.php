@@ -2,7 +2,7 @@
 
 include_once '../bootstrap.php';
 
-class testAsterisk extends PHPUnit_Framework_TestCase
+class testAsterisk// extends PHPUnit_Framework_TestCase
 {
     public function __construct()
     {
@@ -18,7 +18,7 @@ class testAsterisk extends PHPUnit_Framework_TestCase
 
     public function testConn()
     {
-        $server = '192.168.1.188';
+        $server = '192.168.1.189';
         $user = 'admin';
         $pass = 'amp111';
 
@@ -36,16 +36,17 @@ class testAsterisk extends PHPUnit_Framework_TestCase
             fputs($oSocket, "Username: " . $user ."\r\n");
             fputs($oSocket, "Secret: " . $pass ."\r\n\r\n");
 
-            
-            /*
-            fputs($oSocket, "Action: originate\r\n");
-            fputs($oSocket, "Channel: SIP/107\r\n");
+            fputs($oSocket, "Action: Originate\r\n");
+            fputs($oSocket, "Channel: LOCAL/89178962496@from-internal\r\n");
             fputs($oSocket, "WaitTime: 120\r\n");
             fputs($oSocket, "CallerId: open.kzn.ru\r\n");
-            fputs($oSocket, "Exten: 89179273515\r\n");
-            fputs($oSocket, "Context: sipnet\r\n");
+            fputs($oSocket, "Exten: 1001\r\n");
+            fputs($oSocket, "Context: from-internal\r\n");
             fputs($oSocket, "Priority: 1\r\n\r\n");
-            fputs($oSocket, "Action: Logoff\r\n\r\n"); */
+            fputs($oSocket, "Action: Logoff\r\n\r\n");
+            while (!feof($oSocket)) {
+                echo fgets($oSocket, 128);
+            }
             fclose($oSocket);
         }
 
@@ -53,3 +54,6 @@ class testAsterisk extends PHPUnit_Framework_TestCase
     }
 }
 
+
+$a = new testAsterisk();
+$a->testConn();

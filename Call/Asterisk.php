@@ -63,7 +63,7 @@ class Evil_Call_Asterisk implements Evil_TransportInterface
                      * делаем звонок
                      */
 
-                   self::_CallAsterisk();
+                   self::_CallAsterisk($phone);
                     
                     /**
                      * удаляем файл
@@ -93,7 +93,7 @@ class Evil_Call_Asterisk implements Evil_TransportInterface
      * Соединяемся с Asterisk для совершения звонка
      * @return void
      */
-    protected function _CallAsterisk()
+    protected function _CallAsterisk($phone)
     {
         var_dump(self::$_config);
         //echo 'i connect to:' . self::$_config['server'] . ' user:' . self::$_config['username'] . ' pass:' . self::$_config['password'] . PHP_EOL;
@@ -103,13 +103,16 @@ class Evil_Call_Asterisk implements Evil_TransportInterface
         fputs($oSocket, "Events: off\r\n");
         fputs($oSocket, "Username: " . self::$_config['username'] ."\r\n");
         fputs($oSocket, "Secret: " . self::$_config['password'] ."\r\n\r\n");
-        fputs($oSocket, "Action: originate\r\n");
-        fputs($oSocket, "Channel: SIP/107\r\n");
+
+        fputs($oSocket, "Action: Originate\r\n");
+        fputs($oSocket, "Channel: LOCAL/".$phone."@from-internal\r\n");
         fputs($oSocket, "WaitTime: 120\r\n");
         fputs($oSocket, "CallerId: open.kzn.ru\r\n");
-        fputs($oSocket, "Exten: 89179273515\r\n");
-        fputs($oSocket, "Context: sipnet\r\n");
+        fputs($oSocket, "Exten: 1001\r\n");
+        fputs($oSocket, "Context: from-internal\r\n");
         fputs($oSocket, "Priority: 1\r\n\r\n");
+        fputs($oSocket, "Action: Logoff\r\n\r\n");
+
         fputs($oSocket, "Action: Logoff\r\n\r\n");
         fclose($oSocket); 
     }
