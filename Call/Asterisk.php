@@ -41,24 +41,24 @@ class Evil_Call_Asterisk implements Evil_TransportInterface
 
      public static function Call ($phone, $messageToSay)
     {
-        if (self::_validate($phone))
-        {
-            $tmpFile = tempnam('', __CLASS__ . '_');
+//        if (self::_validate($phone))
+//        {
+//            $tmpFile = tempnam('', __CLASS__ . '_');
             /**
              * перегоняем текст в mp3
              */
-            if (Evil_Speech::textToSpeech($messageToSay, $tmpFile)) {
+//            if (Evil_Speech::textToSpeech($messageToSay, $tmpFile)) {
                 /**
                  *
                  * перегоняем mp3 в wav
                  * @var string
                  */
-                $prepearedFile = self::_prepareFile($tmpFile);
+//                $prepearedFile = self::_prepareFile($tmpFile);
                 /**
                  * если файл сконвертился успешно пытаемся позвонить
                  */
-                if (false !== $prepearedFile)
-                {
+//                if (false !== $prepearedFile)
+//                {
                     /**
                      * делаем звонок
                      */
@@ -68,25 +68,25 @@ class Evil_Call_Asterisk implements Evil_TransportInterface
                     /**
                      * удаляем файл
                      */
-                    unlink($prepearedFile);
-                }
-                else
-                {
-                    Evil_Log::log(
-                    __CLASS__ . ': не смогли сконвертировать mp3 в wav',
-                    Zend_Log::CRIT);
-                    return false;
-                }
-            }
-            else
-            {
-                Evil_Log::log(
-                __CLASS__ .
-                 ': не смогли сконвертировать текст в звуковое сообщение',
-                Zend_Log::CRIT);
-                return false;
-            }
-        }
+//                    unlink($prepearedFile);
+//                }
+//                else
+//                {
+///                    Evil_Log::log(
+//                    __CLASS__ . ': не смогли сконвертировать mp3 в wav',
+//                    Zend_Log::CRIT);
+//                    return false;
+//                }
+//            }
+//            else
+//            {
+//                Evil_Log::log(
+//                __CLASS__ .
+//                 ': не смогли сконвертировать текст в звуковое сообщение',
+//                Zend_Log::CRIT);
+//                return false;
+//            }
+//        }
     }
 
      /**
@@ -95,7 +95,7 @@ class Evil_Call_Asterisk implements Evil_TransportInterface
      */
     protected function _CallAsterisk($phone)
     {
-        var_dump(self::$_config);
+//        var_dump(self::$_config);
         //echo 'i connect to:' . self::$_config['server'] . ' user:' . self::$_config['username'] . ' pass:' . self::$_config['password'] . PHP_EOL;
 
         $oSocket = fsockopen(self::$_config['server'], 5038, $errnum, $errdesc) or die("Connection to host failed");
@@ -106,15 +106,17 @@ class Evil_Call_Asterisk implements Evil_TransportInterface
 
         fputs($oSocket, "Action: Originate\r\n");
         fputs($oSocket, "Channel: LOCAL/".$phone."@from-internal\r\n");
-        fputs($oSocket, "WaitTime: 120\r\n");
+        fputs($oSocket, "WaitTime: ".self::$_config['waitTime']."\r\n");
         fputs($oSocket, "CallerId: open.kzn.ru\r\n");
         fputs($oSocket, "Exten: 1001\r\n");
         fputs($oSocket, "Context: from-internal\r\n");
         fputs($oSocket, "Priority: 1\r\n\r\n");
-        fputs($oSocket, "Action: Logoff\r\n\r\n");
 
         fputs($oSocket, "Action: Logoff\r\n\r\n");
-        fclose($oSocket); 
+        while (!feof($oSocket)) {
+            echo fgets($oSocket, 128);
+        }
+        fclose($oSocket);
     }
 
      /**

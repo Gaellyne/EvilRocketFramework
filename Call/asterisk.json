@@ -1,5 +1,6 @@
 {
-    "username" : "1001",
-    "password" : "1qaz2wsx",
-    "server" : "192.168.1.188"
+    "username" : "admin",
+    "password" : "amp111",
+    "server" : "192.168.1.189",
+    "waitTime":120
 }
