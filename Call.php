@@ -24,57 +24,11 @@ class Evil_Call implements Evil_TransportInterface
      */
     public static function Call ($phone, $messageToSay)
     {
-        if (self::_validate($phone)) {
-            $tmpFile = tempnam('', __CLASS__ . '_');
-            /**
-             * перегоняем текст в mp3
-             */
-            if (Evil_Speech::textToSpeech($messageToSay, $tmpFile)) {
-                /**
-                 * 
-                 * перегоняем mp3 в wav
-                 * @var string
-                 */
-                $prepearedFile = self::_prepareFile($tmpFile);
-                /**
-                 * если файл сконвертился успешно пытаемся позвонить
-                 */
-                if (false !== $prepearedFile) {
-                    /**
-                     * делаем звонок
-                     */
-                    $folderName = pathinfo(__FILE__, PATHINFO_DIRNAME) . '/Call/';
-                    chdir($folderName);
-                    $linphoneCmd = sprintf('perl %slinphone.pl %s %s', 
-                    $folderName, escapeshellarg($phone), $prepearedFile);
-                    /**
-                     * системный вызов нашего скрипта для звонка
-                     */
-                    ob_start();
-                    system($linphoneCmd, $status);
-                    $output = ob_get_clean();
-                    unlink($prepearedFile);
-                    if (0 == $status) {
-                        return true;
-                    } else {
-                        Evil_Log::log(__CLASS__ . ': ' . $output, 
-                        Zend_Log::CRIT);
-                        return false;
-                    }
-                } else {
-                    Evil_Log::log(
-                    __CLASS__ . ': не смогли сконвертировать mp3 в wav', 
-                    Zend_Log::CRIT);
-                    return false;
-                }
-            } else {
-                Evil_Log::log(
-                __CLASS__ .
-                 ': не смогли сконвертировать текст в звуковое сообщение', 
-                Zend_Log::CRIT);
-                return false;
-            }
-        }
+        $use = 'Asterisk';
+        $className = 'Evil_Call_'.$use;
+        $caller = new $className();
+
+        $caller->Call($phone, $messageToSay);
     }
     /**
      * 

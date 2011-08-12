@@ -39,84 +39,69 @@ class Evil_Call_Asterisk implements Evil_TransportInterface
     }
 
 
-     public static function Call ($phone, $messageToSay)
+    /**
+     * @static
+     * @param  $phone
+     * @param  $messageToSay
+     * @return array
+     */
+    public static function Call ($phone, $messageToSay)
     {
-//        if (self::_validate($phone))
-//        {
-//            $tmpFile = tempnam('', __CLASS__ . '_');
-            /**
-             * перегоняем текст в mp3
-             */
-//            if (Evil_Speech::textToSpeech($messageToSay, $tmpFile)) {
-                /**
-                 *
-                 * перегоняем mp3 в wav
-                 * @var string
-                 */
-//                $prepearedFile = self::_prepareFile($tmpFile);
-                /**
-                 * если файл сконвертился успешно пытаемся позвонить
-                 */
-//                if (false !== $prepearedFile)
-//                {
-                    /**
-                     * делаем звонок
-                     */
+        //var_dump(self::$_config);
+        $result = array('status', 'data');
 
-                   self::_CallAsterisk($phone);
-                    
-                    /**
-                     * удаляем файл
-                     */
-//                    unlink($prepearedFile);
-//                }
-//                else
-//                {
-///                    Evil_Log::log(
-//                    __CLASS__ . ': не смогли сконвертировать mp3 в wav',
-//                    Zend_Log::CRIT);
-//                    return false;
-//                }
-//            }
-//            else
-//            {
-//                Evil_Log::log(
-//                __CLASS__ .
-//                 ': не смогли сконвертировать текст в звуковое сообщение',
-//                Zend_Log::CRIT);
-//                return false;
-//            }
-//        }
+        $oSocket = fsockopen(self::$_config['server'], self::$_config['port'], $errnum, $errdesc) or die("Connection to host failed");
+
+        if (!$oSocket)
+        {
+            $result['status'] = 'Connection error';
+            $result['data'] = $errdesc . '(' . $errnum . '.)'. PHP_EOL;
+        }
+        else
+        {
+            $result['status'] = 'Connection ok';
+
+            fputs($oSocket, "Action: login\r\n");
+            fputs($oSocket, "Events: on\r\n");
+            fputs($oSocket, "Username: " . self::$_config['username'] . "\r\n");
+            fputs($oSocket, "Secret: " . self::$_config['password'] . "\r\n\r\n");
+
+            fputs($oSocket, "Action: Originate\r\n");
+            fputs($oSocket, "Channel: LOCAL/" . $phone . "@from-internal\r\n");
+        //  fputs($oSocket, "Channel: SIP/1001\r\n");
+            fputs($oSocket, "WaitTime: " . self::$_config['wait'] ."\r\n");
+            fputs($oSocket, "CallerId: open.kzn.ru\r\n");
+            fputs($oSocket, "Exten: s\r\n");
+            fputs($oSocket, "Variable: Variable1=". $messageToSay ."\r\n");
+
+            fputs($oSocket, "Context: default\r\n");
+            fputs($oSocket, "Priority: 1\r\n\r\n");
+
+            fputs($oSocket, "Action: Logoff\r\n\r\n");
+
+            while (!feof($oSocket))
+            {
+                $result['data'] = fgets($oSocket, 128);
+            }
+
+            fclose($oSocket);
+        }
+
+        return $result;
+
     }
 
      /**
-     * Соединяемся с Asterisk для совершения звонка
-     * @return void
+     *
+     * Звонок для сообщения что осталось жить 7 дней
+     * @author NuR
+     * @param string $phone
+     * @return bool
      */
-    protected function _CallAsterisk($phone)
+
+    public static function sevenDays ($phone)
     {
-//        var_dump(self::$_config);
-        //echo 'i connect to:' . self::$_config['server'] . ' user:' . self::$_config['username'] . ' pass:' . self::$_config['password'] . PHP_EOL;
-
-        $oSocket = fsockopen(self::$_config['server'], 5038, $errnum, $errdesc) or die("Connection to host failed");
-        fputs($oSocket, "Action: login\r\n");
-        fputs($oSocket, "Events: off\r\n");
-        fputs($oSocket, "Username: " . self::$_config['username'] ."\r\n");
-        fputs($oSocket, "Secret: " . self::$_config['password'] ."\r\n\r\n");
-
-        fputs($oSocket, "Action: Originate\r\n");
-        fputs($oSocket, "Channel: LOCAL/".$phone."@from-internal\r\n");
-        fputs($oSocket, "WaitTime: ".self::$_config['waitTime']."\r\n");
-        fputs($oSocket, "CallerId: open.kzn.ru\r\n");
-        fputs($oSocket, "Exten: 1001\r\n");
-        fputs($oSocket, "Context: from-internal\r\n");
-        fputs($oSocket, "Priority: 1\r\n\r\n");
-
-        fputs($oSocket, "Action: Logoff\r\n\r\n");
-        while (!feof($oSocket)) {
-            echo fgets($oSocket, 128);
-        }
-        fclose($oSocket);
+        return self::Call($phone, 'Тебе осталось жить 7 дней');
     }
 
      /**
@@ -131,24 +116,7 @@ class Evil_Call_Asterisk implements Evil_TransportInterface
         return $vlidator->isValid($phoneNumber);
     }
 
-     /**
-     * подготовка файла
-     * перегонка из mp3 в wav например
-     * @param string $file
-     * @return string $file
-     */
-    private static function _prepareFile ($file)
-    {
-        $lameCmd = 'lame --decode --mp3input ' . escapeshellarg($file);
-        ob_start();
-        system($lameCmd, $status);
-        $output = ob_get_clean();
-        unlink($file);
-        if (0 == $status) {
-            return $file . '.wav';
-        }
-        return false;
-    }
+
 
 
 }
