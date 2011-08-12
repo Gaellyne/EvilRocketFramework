@@ -28,7 +28,7 @@ class Evil_Call implements Evil_TransportInterface
         $className = 'Evil_Call_'.$use;
         $caller = new $className();
 
-        $caller->Call($phone, $messageToSay);
+        return $caller->Call($phone, $messageToSay);
     }
     /**
      * 
