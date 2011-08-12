@@ -83,5 +83,5 @@ class testAsterisk extends PHPUnit_Framework_TestCase
 }
 
 
-$a = new testAsterisk();
-$a->testConnection();
+//$a = new testAsterisk();
+//$a->testConnection();
