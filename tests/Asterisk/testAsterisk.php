@@ -16,6 +16,14 @@ class testAsterisk extends PHPUnit_Framework_TestCase
         return $asterisk;
     }
 
+    public function testSevenDays()
+    {
+        $asterisk = new Evil_Call_Asterisk();
+        $r = $asterisk->sevenDays('89179273515');
+        var_dump($r);
+        return $r;
+    }
+
     public function testConn()
     {
         $server = '192.168.100.249';
@@ -62,6 +70,12 @@ class testAsterisk extends PHPUnit_Framework_TestCase
         }
 
         var_dump('aaa');
+    }
+
+    public function testEvilCall()
+    {
+        $evilCall = new Evil_Call();
+        $evilCall->Call('89179273515', 'привет я киберзло мухахахаха');
     }
 }
 

@@ -39,22 +39,15 @@ class Evil_Call_Asterisk implements Evil_TransportInterface
     }
 
 
-     public static function Call ($phone, $messageToSay)
-    {
-       $res = self::_CallAsterisk($phone, $messageToSay);
-       return $res;
-    }
-
-     /**
-     * Соединяемся с Asterisk для совершения звонка
-     * @param $phone : string
-     * @param $message : string
+    /**
+     * @static
+     * @param  $phone
+     * @param  $messageToSay
      * @return array
      */
-    protected function _CallAsterisk($phone, $message)
+     public static function Call ($phone, $messageToSay)
     {
-        var_dump(self::$_config);
-
+        //var_dump(self::$_config);
         $result = array('status', 'data');
 
         $oSocket = fsockopen(self::$_config['server'], self::$_config['port'], $errnum, $errdesc) or die("Connection to host failed");
@@ -79,7 +72,7 @@ class Evil_Call_Asterisk implements Evil_TransportInterface
             fputs($oSocket, "WaitTime: " . self::$_config['wait'] ."\r\n");
             fputs($oSocket, "CallerId: open.kzn.ru\r\n");
             fputs($oSocket, "Exten: s\r\n");
-            fputs($oSocket, "Variable: Variable1=". $message ."\r\n");
+            fputs($oSocket, "Variable: Variable1=". $messageToSay ."\r\n");
 
             fputs($oSocket, "Context: default\r\n");
             fputs($oSocket, "Priority: 1\r\n\r\n");
@@ -98,6 +91,18 @@ class Evil_Call_Asterisk implements Evil_TransportInterface
     }
 
      /**
+     *
+     * Звонок для сообщения что осталось жить 7 дней
+     * @author NuR
+     * @param string $phone
+     * @return bool
+     */
+    public static function sevenDays ($phone)
+    {
+        return self::Call($phone, 'Тебе осталось жить 7 дней');
+    }
+
+     /**
      * валидация номера телефона
      * @param string $phoneNumber
      * @return bool
@@ -109,24 +114,7 @@ class Evil_Call_Asterisk implements Evil_TransportInterface
         return $vlidator->isValid($phoneNumber);
     }
 
-     /**
-     * подготовка файла
-     * перегонка из mp3 в wav например
-     * @param string $file
-     * @return string $file
-     */
-    private static function _prepareFile ($file)
-    {
-        $lameCmd = 'lame --decode --mp3input ' . escapeshellarg($file);
-        ob_start();
-        system($lameCmd, $status);
-        $output = ob_get_clean();
-        unlink($file);
-        if (0 == $status) {
-            return $file . '.wav';
-        }
-        return false;
-    }
+
 
 
 }
