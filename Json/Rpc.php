@@ -9,7 +9,8 @@ class Evil_Json_Rpc
 {
     
      public static $rpcUrl = null;
-	
+	 protected static $_requestId = 1;
+     protected static $_client = null;
     /**
      * 
      * Generate checksum given data
@@ -76,9 +77,8 @@ class Evil_Json_Rpc
     
     public static function __callStatic ($methodName,$params)
     {
-        
-        static $requestId = 1; 
-        static $client = null;
+
+        $client = self::$_client;
         if(null == $client)
         {
             /**
@@ -95,14 +95,16 @@ class Evil_Json_Rpc
                 'timeout'      => 300,
                 'useragent'    => 'Evil_Json_Rpc'
             );
+            
             $client = new Zend_Http_Client(self::$rpcUrl);
             $client->setConfig($options);
+            self::$_client = $client;
         }
        
         $requestParams = array(
     						'method' => $methodName,
     						'params' => $params,
-                            'id' => $requestId++
+                            'id' => self::$_requestId++
 						);
 						
 		$request = Zend_Json::encode($requestParams);

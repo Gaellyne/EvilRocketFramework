@@ -28,8 +28,10 @@ class Evil_Ext_Ext extends Zend_View_Helper_Abstract
 	
 	public function Ext()
 	{
-	   $config = Zend_Registry::get('config');
 	    $this->_addScripts( 'jquery-1.5.1.min.js','/js/' );
+	    //$this->_addScripts( 'jquery.waterfall.js','/js/' );
+	     
+	      $this->_addScripts( 'jquery.jgrowl_minimized.js','/js/' );
 		$scripts = array(
 		 '/adapter/jquery/ext-jquery-adapter.js',
 		 '/ext-all.js',
@@ -43,6 +45,7 @@ class Evil_Ext_Ext extends Zend_View_Helper_Abstract
 		$styles = array(
 		'/resources/css/ext-all-notheme.css',
 		'/resources/css/opencity.css');
+		$this->_addStyles('jquery.jgrowl.css','/js/');
 		$this->_addStyles($styles);
 		
 		return $this;
