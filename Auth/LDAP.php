@@ -46,7 +46,11 @@ class Evil_Auth_LDAP implements Evil_Auth_Interface
         list($login, $password) = $this->getLoginAndPassword($controller, $config);
 
         $adapter = new Zend_Auth_Adapter_Ldap($config, $login, $password);
-        return $adapter->authenticate();
+        $result  = $adapter->authenticate();
+        if($result->isValid())
+            return $result->getIdentity();
+        else
+            return -1;
     }
 
     /**
