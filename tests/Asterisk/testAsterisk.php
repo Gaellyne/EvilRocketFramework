@@ -2,7 +2,7 @@
 
 include_once '../bootstrap.php';
 
-class testAsterisk extends PHPUnit_Framework_TestCase
+class testAsterisk //extends PHPUnit_Framework_TestCase
 {
     public function __construct()
     {
@@ -27,7 +27,7 @@ class testAsterisk extends PHPUnit_Framework_TestCase
     public function testConn()
     {
 
-        $server = '192.168.100.249';
+        $server = '192.168.100.106';
         //$server = '192.168.1.188';
         $port = "5038";
         $user = 'admin';
@@ -83,5 +83,6 @@ class testAsterisk extends PHPUnit_Framework_TestCase
 }
 
 
-//$a = new testAsterisk();
-//$a->testConnection();
+$a = new testAsterisk();
+$a->testSevenDays();
+var_dump($a);
