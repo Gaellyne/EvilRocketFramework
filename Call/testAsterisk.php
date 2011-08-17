@@ -18,7 +18,7 @@ class testAsterisk
 
     public function testConn()
     {
-        $server = '192.168.1.188';
+        $server = '192.168.100.106';
         $user = 'admin';
         $pass = 'amp111';
 
@@ -32,20 +32,36 @@ class testAsterisk
             echo 'conn ok', PHP_EOL;
             
             fputs($oSocket, "Action: login\r\n");
-            fputs($oSocket, "Events: off\r\n");
+            fputs($oSocket, "Events: on\r\n");
             fputs($oSocket, "Username: " . $user ."\r\n");
             fputs($oSocket, "Secret: " . $pass ."\r\n\r\n");
 
             
             /*
             fputs($oSocket, "Action: originate\r\n");
-            fputs($oSocket, "Channel: SIP/107\r\n");
+            fputs($oSocket, "Channel: SIP/1001\r\n");
             fputs($oSocket, "WaitTime: 120\r\n");
             fputs($oSocket, "CallerId: open.kzn.ru\r\n");
             fputs($oSocket, "Exten: 89179273515\r\n");
             fputs($oSocket, "Context: sipnet\r\n");
             fputs($oSocket, "Priority: 1\r\n\r\n");
             fputs($oSocket, "Action: Logoff\r\n\r\n"); */
+            
+           fputs($oSocket, "Action: Originate\r\n");
+           fputs($oSocket, "Channel: LOCAL/79179273515@from-internal\r\n");
+           fputs($oSocket, "WaitTime: 120\r\n");
+           fputs($oSocket, "CallerId: open.kzn.ru\r\n");
+           fputs($oSocket, "Exten: s\r\n");
+           fputs($oSocket, "Variable: Variable1=ÐÑÐ¸Ð²ÐµÑ. Ð­ÑÐ¾ Ð°ÑÑÐµÑÐ¸ÑÐº. Ð¯ ÑÐ¼ÐµÑ Ð·Ð²Ð¾Ð½Ð¸ÑÑ Ð¸ Ð³Ð¾Ð²Ð¾ÑÐ¸ÑÑ ÑÐ¾ ÑÑÐ¾ Ð¼Ð½Ðµ Ð¿ÑÐ¸ÐºÐ°Ð¶ÑÑ.\r\n");
+           fputs($oSocket, "Context: default\r\n");
+           fputs($oSocket, "Priority: 1\r\n\r\n");
+
+           fputs($oSocket, "Action: Logoff\r\n\r\n");
+
+            while (!feof($oSocket))
+            {
+                echo fgets($oSocket, 128);
+            }
             fclose($oSocket);
         }
 
