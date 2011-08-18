@@ -212,12 +212,17 @@ class Evil_Application extends  Zend_Application
      * @description get default config
      * @return array
      * @author Se#
-     * @version 0.0.2
+     * @version 0.0.3
+     * @changeLog
+     * 0.0.3 more flexible default path
      */
     protected function _defaultConfig()
     {
-        return is_file(__DIR__ . '/Application/configs/default.ini') ?
-                $this->_loadConfig(__DIR__ . '/Application/configs/default.ini', true) :
-                array();
+        $path = __DIR__ . '/Application/configs/default.ini';
+
+        if(is_file(APPLICATION_PATH . '/configs/default.ini'))
+            $path = APPLICATION_PATH . '/configs/default.ini';
+
+        return is_file($path) ? $this->_loadConfig($path, true) : array();
     }
 }
