@@ -1,5 +1,8 @@
 <?php
-
+/**
+ * @author Se#
+ * @version 0.0.1
+ */
 class Evil_Translate extends Zend_Controller_Plugin_Abstract
 {
     protected static $_ses = null;

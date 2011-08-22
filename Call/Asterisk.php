@@ -8,7 +8,7 @@
  * @author Adel Shigabutdinov
  *
  */
-class Evil_Call_Asterisk implements Evil_TransportInterface
+class Evil_Call_Asterisk// implements Evil_TransportInterface
 {
     protected static $_config = array();
 
