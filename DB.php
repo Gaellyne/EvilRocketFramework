@@ -17,21 +17,54 @@
         {
             $controller = $request->getControllerName();
             $config = Zend_Registry::get('config');
-
             if (isset($config['resources']['db'][$controller]))
             {
-                $db = Zend_Db::factory(
-                    $config['resources']['db'][$controller]['adapter'],
-                    $config['resources']['db'][$controller]['params']);
-
-                Zend_Registry::set('db-prefix',$config['resources']['db'][$controller]['prefix']);
+                $dbs=$config['resources']['db'][$controller];
+                if(!isset($dbs[0]))
+                    $dbs=array($dbs);
+                $dbs=$config['resources']['db'][$controller];
+                $count=sizeof($dbs);
+                for($i=0;$i<$count;$i++){
+                    $connect=true;
+                    try{
+                        $db = Zend_Db::factory($dbs[$i]['adapter'], $dbs[$i]['params']);
+                        $db->getConnection();
+                    }
+                    catch(Zend_Db_Adapter_Exception $e){
+                        $connect=false;
+                    }
+                    catch(Zend_Exception $e){
+                        $connect=false;
+                    }
+                    if($connect==true){
+                        Zend_Registry::set('db-prefix',$dbs[$i]['prefix']);
+                        break;
+                    }
+                }
             }
             else
             {
-                $db = Zend_Db::factory(
-                    $config['resources']['db']['adapter'],
-                    $config['resources']['db']['params']);
-                Zend_Registry::set('db-prefix',$config['resources']['db']['prefix']);
+                $dbs=$config['resources']['db'];
+                if(!isset($dbs[0]))
+                    $dbs=array($dbs);
+                $count=sizeof($dbs);
+                for($i=0;$i<$count;$i++){
+                    $connect=true;
+                    try{
+                        $db = Zend_Db::factory($dbs[$i]['adapter'], $dbs[$i]['params']);
+                        $db->getConnection();
+                    }
+                    catch(Zend_Db_Adapter_Exception $e){
+                        $connect=false;
+                    }
+                    catch(Zend_Exception $e){
+                        $connect=false;
+                    }
+                    if($connect==true){
+                        Zend_Registry::set('db-prefix',$dbs[$i]['prefix']);
+                        break;
+                    }
+                }
             }
 
             if ($config['evil']['db']['profiling'])
