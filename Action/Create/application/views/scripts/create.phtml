@@ -7,9 +7,3 @@ if(isset($this->form))
     echo $this->form;
 else
     echo 'Missed form';
-
-foreach($this->evilAutoloads as $name => $function)
-{
-    if(isset($this->$name))
-        echo call_user_func($function, $this->$name);
-}
