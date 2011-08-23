@@ -5,7 +5,7 @@ Architecture: all
 Depends: libzend-framework-php
 Provides: evil-rocket-framework
 Priority: optional
-Version: 11.08-TRS
+Version: 11.08-trs
 Maintainer: Dmitry Bergstein
 Description: Evil Rocket Framework
 Installed-Size: 20137901
