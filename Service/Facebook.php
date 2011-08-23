@@ -7,6 +7,7 @@
 
 class Evil_Service_Facebook
 {
+	
 	/**
 	 * @desc application ID
 	 */
