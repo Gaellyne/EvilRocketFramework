@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<project name="ocweb" default="deploy" basedir=".">
+<project name="evil" default="deploy" basedir=".">
 
         <!-- variables -->
         <property name="inc" value="jenkins" />
