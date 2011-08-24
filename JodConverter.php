@@ -2,7 +2,7 @@
  /**
   * для работы необходимо установить jodconverter от openoffice, из Папки JodConverter скопировать в /etc/init.d openoffice.sh и запустить /etc/init.d/./openoffice.sh start
 	-    во время работы jodconverter'а openoffice не будет работать
-	-    остновить /etc/init.d/./openoffice.sh stop
+	-    остновить /etc/init.d/openoffice.sh stop
 
   * Отправляет комманду jodconverter'у для конвертирования 
     Конвертирует:
@@ -153,12 +153,19 @@ class Evil_JodConverter{
 	    }
 	    $canConvert=($inputFormat==$outputFormat);
 	}
-	if($canConvert==true)
-	    return shell_exec('jodconverter '.$inputFileName.' '.$outputFileName);
-	else{
-	    self::$_error.='conversion from '.$inputFormat.' format ('.$inputExt.') '.$inputFormat.' format ('.$outputExt.') does not supported.'."\n";
-	    return false;
-	}
+        if($canConvert==true)
+        {
+           //return shell_exec('jodconverter '.$inputFileName.' '.$outputFileName);
+            $cmd = 'java -jar '.__DIR__.'/JodConverter/jodconverter-cli-2.2.2.jar ' . $inputFileName . ' ' . $outputFileName;
+            $ret = shell_exec($cmd);
+            $ret = $cmd;
+            return $ret;
+        }
+        else
+        {
+            self::$_error.='conversion from '.$inputFormat.' format ('.$inputExt.') '.$inputFormat.' format ('.$outputExt.') does not supported.'."\n";
+            return false;
+        }
     }
 }
 ?>
