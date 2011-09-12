@@ -26,6 +26,7 @@ class Evil_Email implements Evil_TransportInterface {
         if($this->_isValidRecipient($to))
         {
             $this->_mailer->clearRecipients();
+
             $this->_mailer->setBodyText($message);
             $this->_mailer->addTo($to);
             return $this->_mailer->send();
@@ -45,7 +46,7 @@ class Evil_Email implements Evil_TransportInterface {
     private function _isValidRecipient($email)
     {
         $validator = new Zend_Validate_EmailAddress();
-        return $validator->isValid($validator);
+        return $validator->isValid($email);
     }
 
 	/**
@@ -65,7 +66,7 @@ class Evil_Email implements Evil_TransportInterface {
          $defaultTransport = new $this->_transport($this->_config);
          Zend_Mail::setDefaultTransport($defaultTransport);
          
-         $this->_mailer = new Zend_Mail();
+         $this->_mailer = new Zend_Mail('UTF-8');
         
     }
 
