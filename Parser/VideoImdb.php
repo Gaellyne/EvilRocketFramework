@@ -64,7 +64,7 @@ class Evil_Parser_VideoImdb implements   Evil_Parser_Interface
         		$result[] = $item;     		
         	}
 		}		
-		/*
+
 		$request = array();
 		$hoho = array_unique($result);					
 		foreach ($hoho as $index=>$id)
@@ -72,9 +72,6 @@ class Evil_Parser_VideoImdb implements   Evil_Parser_Interface
 			$requesturl = 'http://www.imdbapi.com/?t=' .$id .'&year=2011' ;
 			$request[$whatWeNeed] = json_decode(file_get_contents($requesturl),true);
 		}
-		*/
-        $requesturl = 'http://www.imdbapi.com/?t=tt0780504';
-        $request = array(json_decode(file_get_contents($requesturl),true));
 
 		foreach ($request as $index=>$mas)
             $request[$index]['Released'] = date("Y-m-d", strtotime($mas['Released']));
