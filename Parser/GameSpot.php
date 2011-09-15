@@ -14,6 +14,7 @@ class Evil_Parser_GameSpot implements  Evil_Parser_Interface
 	 * @example returned array
 	 
 	 array {
+            {'category' =>
                 [0] => array {
                                 ["name"]    =>  "LIMBO"
                                 ["desc"]    =>  "LIMBO is a black-and-white puzzle platforming adventure."
@@ -22,11 +23,12 @@ class Evil_Parser_GameSpot implements  Evil_Parser_Interface
                                 ["rating"]  =>  "9.0"
                                 ["image"]   =>  "http://image.gamespotcdn.net/gamespot/images//2003/all/boxshots2/635383_218593.jpg"
                               }
+                    }
             }
 	 ......................................................................................
 	 * @version 0.0.1
 	 */
-	public function parse()
+	public function parse($what = null)
 	{
 		$url = 'http://www.gamespot.com/games.html?mode=top&platform=5&type=top_rated';
 		$content = file_get_contents($url);
@@ -101,10 +103,10 @@ class Evil_Parser_GameSpot implements  Evil_Parser_Interface
         	$image[] = $item;
         }
         
-        $result = array();
+        $result['top'] = array();
         foreach ($name as $index=>$value)
         {
-        	$result[] = array(
+        	$result['top'][] = array(
                                         "name"  =>  $value,
         								"desc"  =>  $desc[$index],
         								"date"  =>  $date[$index],

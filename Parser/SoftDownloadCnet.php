@@ -24,7 +24,7 @@ class Evil_Parser_SoftDownloadCnet implements  Evil_Parser_Interface
 	.................................................................................
 	 * @version 0.0.1
 	 */
-	public function parse()
+	public function parse($what = null)
 	{
 		$url = 'http://download.cnet.com/windows/most-popular/3101-20_4-0.html?tag=rb_content;main';
 		$content = file_get_contents($url);
@@ -85,10 +85,10 @@ class Evil_Parser_SoftDownloadCnet implements  Evil_Parser_Interface
         	$item = substr($value, strpos($value,'0-9'), $position - 1);        	
         	$download[] = $item;
         }
-        $result = array();
+        $result['top'] = array();
         foreach ($name as $index=>$value)
         {
-        	$result[] = array(
+        	$result['top'][] = array(
                                         "name"      =>$value,
         								"desc"      =>$desc[$index],
         								"date"      =>$date[$index],
