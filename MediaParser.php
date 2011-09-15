@@ -13,6 +13,9 @@
  
 class Evil_MediaParser
 {
+    protected $classNamePrefix = 'Evil_Parser_';
+
+    protected $directoryForParsers;
     //имена файлов с парерами
     private $parserFiles = array();
 
@@ -22,36 +25,64 @@ class Evil_MediaParser
 
     function __construct()
     {
-      //  if (! $this->getFilesWithParsers()) return false;
+        $this->directoryForParsers = __DIR__ . '/Parser';
+
+        $this->getFilesWithParsers();
     }
 
-    //mock object
-    public function parse($contentType = null)
+    /**
+     * @param null $contentType
+     * @return array of 'content_type_1' => [
+     *                                'category_1_name' => [
+     *                                          '0' or 'name' =>
+     *                                                      ['name' => name
+     *                                                      'desc' => desc]
+     *                                          '1' or 'name' =>
+     *                                                      ['name' => name
+     *                                                      'desc' => desc]
+     *                                           ]
+     *                                 'category_2_name' => [
+     *                                          '0' or 'name' =>
+     *                                                      ['name' => name
+     *                                                      'desc' => desc]
+     *                                          '1' or 'name' =>
+     *                                                      ['name' => name
+     *                                                      'desc' => desc]
+     *                                           ]
+     *                                      ]
+     *                    'content_type_2' => [....]
+     *
+     */
+    public function parse($contentType = null, $category = null)
     {
-        return array ("AVG Anti-Virus Free Edition 201" => array(
-    				        "desc" 	 => "Protect your computer from viruses and malicious programs",
-    				        "date" 	 => "2011-09-08",
-    				        "rating"   => "9",
-    				       "download" => "1,044,81")
-  					);
-/*        if (! $this->getParsersClass($contentType)) return false;
+        //если парсеры для данного типа контента не найдены
+        if (! $this->getParsersClass($contentType)) return false;
 
-        return $this->classParser;*/
+        $content = array();
         //инстанцирование и запуск парсеров
+        foreach ($this->classParser as $parser){
+            $obj = new $parser();
+            $res = $obj->parse($category);
+            var_dump($res);
+            $content[$contentType] = $res;
+        }
+        return $content;
     }
 
     protected function getFilesWithParsers()
     {
-        $handle = opendir('Parser');
+        $handle = opendir($this->directoryForParsers);
         if (!$handle)
             throw new Exception('Dir not exist');
 
         while (false !== ($fileName = readdir($handle))) {
+            //пропустим заведомо не файлы (. и ..) и интерфейсы
+            if (strlen($fileName) < 4 || strstr($fileName, 'Interface'))
+                continue;
+
             array_push($this->parserFiles, $fileName);
         }
-
         if (empty($this->parserFiles)) return null;
-
         return $this->parserFiles;
     }
 
@@ -62,8 +93,9 @@ class Evil_MediaParser
             if ((!is_null($contentType)) && (stripos($parser, $contentType) === false))
                 continue;
 
-            $className = explode('.', $parser, 1);
-
+            list($className, $ext) = explode('.', $parser);
+            $className = $this->classNamePrefix . $className;
+            
             if (!class_exists($className))
                 throw new Exception("Parser $className not exist, but file $parser is found");
 
