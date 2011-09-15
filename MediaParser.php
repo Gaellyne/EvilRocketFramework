@@ -65,7 +65,7 @@ class Evil_MediaParser
         foreach ($this->classParser as $parser){
             $obj = new $parser();
             $res = $obj->parse($category);
-            $content[$contentType][$category] = array_pop($res);
+            $content[$contentType] = $res;
         }
         return $content;
     }
