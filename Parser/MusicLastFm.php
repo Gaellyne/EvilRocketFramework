@@ -8,7 +8,22 @@
 
 class Evil_Parser_MusicLastFm implements  Evil_Parser_Interface
 {
-	
+    protected $_apiKey = 'c04029734cac3ccf1dccfdf7e45168a3';
+	public function parse($what = null)
+    {
+        switch($what)
+        {
+            case 'top': return $this->getTopTracks();break;
+            case 'new': return $this->getLoveTracks();break;
+            case null :
+                $array = $this->getLoveTracks();
+                $array1 =  $this->getTopTracks();
+                return array_merge($array,$array1);
+            break;
+            default:
+                throw new Exception('undefined category '. $what);
+        }
+    }
 	/**
 	 * @desc 
 	 * @author makinder
@@ -46,15 +61,18 @@ class Evil_Parser_MusicLastFm implements  Evil_Parser_Interface
 	 	...........................................................................
 	 * @version 0.0.1
 	 */
-	public function getTopTracks($apiKey)
+	public function getTopTracks()
 	{
 		
-		$url = 'http://ws.audioscrobbler.com/2.0/?method=chart.gettoptracks&api_key='.$apiKey;
+		$url = 'http://ws.audioscrobbler.com/2.0/?method=chart.gettoptracks&api_key='.$this->_apiKey;
 		$request = file_get_contents($url);
-		$xmlobj  = @simplexml_load_string($request);
+		$xmlobj  = simplexml_load_string($request);
 		$json = json_encode($xmlobj);
 		$response = json_decode($json,TRUE);
-		return $response;
+        foreach($response as $index=>$value)
+            $result[] = $value['track'];
+		unset($result[0]);
+        return $result;
 	}
 	
 	
@@ -87,11 +105,11 @@ class Evil_Parser_MusicLastFm implements  Evil_Parser_Interface
 	 .................................................................................................
 	 * @version 0.0.1
 	 */
-	public function getLoveTracks($apiKey)
+	public function getLoveTracks()
 	{
-		$url = 'http://ws.audioscrobbler.com/2.0/?method=chart.getlovedtracks&api_key='. $apiKey; 
+		$url = 'http://ws.audioscrobbler.com/2.0/?method=chart.getlovedtracks&api_key='. $this->_apiKey;
 		$request = file_get_contents($url);
-		$xmlobj  = @simplexml_load_string($request);
+		$xmlobj  = simplexml_load_string($request);
 		$json = json_encode($xmlobj);
 		$response = json_decode($json,TRUE);
 		return $response;

@@ -58,13 +58,14 @@ class Evil_MediaParser
         //если парсеры для данного типа контента не найдены
         if (! $this->getParsersClass($contentType)) return false;
 
+        $category = strtolower($category);
+        
         $content = array();
         //инстанцирование и запуск парсеров
         foreach ($this->classParser as $parser){
             $obj = new $parser();
             $res = $obj->parse($category);
-            var_dump($res);
-            $content[$contentType] = $res;
+            $content[$contentType][$category] = array_pop($res);
         }
         return $content;
     }
