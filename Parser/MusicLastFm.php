@@ -8,17 +8,29 @@
 
 class Evil_Parser_MusicLastFm implements  Evil_Parser_Interface
 {
+    /**
+     * @desc application key
+     */
     protected $_apiKey = 'c04029734cac3ccf1dccfdf7e45168a3';
+
+
+    /**
+     * @desc get infomation
+     * @author makinder
+     * @param string $what
+     * @return array
+     * @version 0.0.1
+     */
 	public function parse($what = null)
     {
         switch($what)
         {
-            case 'top': return $this->getTopTracks();break;
-            case 'new': return $this->getLoveTracks();break;
+            case 'top': return $this->_getTopTracks();break;
+            case 'new': return $this->_getLoveTracks();break;
             case null :
-                $array = $this->getLoveTracks();
-                $array1 =  $this->getTopTracks();
-                return array_merge($array,$array1);
+                $love = $this->_getLoveTracks();
+                $top =  $this->_getTopTracks();
+                return array_merge($love,$top);
             break;
             default:
                 throw new Exception('undefined category '. $what);
@@ -61,7 +73,7 @@ class Evil_Parser_MusicLastFm implements  Evil_Parser_Interface
 	 	...........................................................................
 	 * @version 0.0.1
 	 */
-	public function getTopTracks()
+	protected function _getTopTracks()
 	{
 		
 		$url = 'http://ws.audioscrobbler.com/2.0/?method=chart.gettoptracks&api_key='.$this->_apiKey;
@@ -105,13 +117,16 @@ class Evil_Parser_MusicLastFm implements  Evil_Parser_Interface
 	 .................................................................................................
 	 * @version 0.0.1
 	 */
-	public function getLoveTracks()
+	protected function _getLoveTracks()
 	{
 		$url = 'http://ws.audioscrobbler.com/2.0/?method=chart.getlovedtracks&api_key='. $this->_apiKey;
 		$request = file_get_contents($url);
 		$xmlobj  = simplexml_load_string($request);
 		$json = json_encode($xmlobj);
 		$response = json_decode($json,TRUE);
-		return $response;
+        foreach($response as $index=>$value)
+            $result[] = $value['track'];
+		unset($result[0]);
+        return $result;
 	}
 }
