@@ -31,7 +31,11 @@ class Evil_MediaParser
     }
 
     /**
-     * @param null $contentType
+     * Распарсить контент с медиаСайтов
+     * @desc Запускает парсеры, парсеры можно ограничить
+     * арегментами
+     * @param null $contentType (Video, Game, Music, Soft, ...)
+     * @param null $category (top, new and etc..) into concret parser
      * @return array of 'content_type_1' => [
      *                                'category_1_name' => [
      *                                          '0' or 'name' =>
@@ -70,6 +74,11 @@ class Evil_MediaParser
         return $content;
     }
 
+    /**
+     * Найти файлы, содержащие все парсеры
+     * @throws Exception
+     * @return array|null parsers file names
+     */
     protected function getFilesWithParsers()
     {
         $handle = opendir($this->directoryForParsers);
@@ -87,6 +96,12 @@ class Evil_MediaParser
         return $this->parserFiles;
     }
 
+    /**
+     * Найти в файлах необходимые парсеры
+     * @throws Exception
+     * @param null $contentType
+     * @return null|array of Parsers name
+     */
     protected function getParsersClass($contentType = null)
     {
         foreach ($this->parserFiles as $key => $parser) {
@@ -99,7 +114,9 @@ class Evil_MediaParser
             
             if (!class_exists($className))
                 throw new Exception("Parser $className not exist, but file $parser is found");
-
+            if (! in_array('Evil_Parser_Interface', class_implements($className)))
+                trigger_error('Class '. $className . " must be implements Evil_Parser_Interface", E_USER_WARNING);
+            
             array_push($this->classParser, $className);
         }
 

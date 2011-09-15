@@ -6,7 +6,7 @@
  * Time: 12:32
  */
 
-interface Evil_Parser_interface
+interface Evil_Parser_Interface
 {
     /**
      * Return array of content. if what omitted return all.
