@@ -4,7 +4,7 @@
  * @author makinder
  * @version 0.0.1
  */
-class Evil_Parser_DownloadCnetParser
+class Evil_Parser_SoftDownloadCnet implements  Evil_Parser_Interface
 {
 	/**
 	 * @desc get infomation about popular program
@@ -12,16 +12,15 @@ class Evil_Parser_DownloadCnetParser
 	 * @return array
 	 * @example returned array
 
-	array(20) 
-	{
-  		["AVG Anti-Virus Free Edition 201"] => array(4) 
-  				{
-    				["desc"] 	 => "Protect your computer from viruses and malicious programs"
-    				["date"] 	 => "2011-09-08"
-    				["rating"]   => "9"
-    				["download"] => "1,044,81"
-  				}	
-  	}
+	array {
+                [0] => array {
+                                    ["name"]        =>  "AVG Anti-Virus Free Edition 201"
+                                    ["desc"]        =>  "Protect your computer from viruses and malicious programs"
+                                    ["date"]        =>  "2011-09-01"
+                                    ["rating"]      =>  "9"
+                                    ["download"]    =>  "1,044,81"
+                                }
+              }
 	.................................................................................
 	 * @version 0.0.1
 	 */
@@ -89,11 +88,12 @@ class Evil_Parser_DownloadCnetParser
         $result = array();
         foreach ($name as $index=>$value)
         {
-        	$result[$value] = array(
-        								"desc"=>$desc[$index],
-        								"date"=>$date[$index],
-        								"rating"=>isset($rating[$index])?$rating[$index]:rand(6, 10),
-        								"download"=>isset($download[$index])?$download[$index]:rand(100000, 1000000)
+        	$result[] = array(
+                                        "name"      =>$value,
+        								"desc"      =>$desc[$index],
+        								"date"      =>$date[$index],
+        								"rating"    =>isset($rating[$index])?$rating[$index]:rand(6, 10),
+        								"download"  =>isset($download[$index])?$download[$index]:rand(100000, 1000000)
         							);
         }
         return $result;

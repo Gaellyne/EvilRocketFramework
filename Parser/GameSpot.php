@@ -5,7 +5,7 @@
  * @version 0.0.1
  */
 
-class Evil_Parser_GameSpotParser
+class Evil_Parser_GameSpot implements  Evil_Parser_Interface
 {
 	/**
 	 * @desc get infomation about top games
@@ -13,16 +13,16 @@ class Evil_Parser_GameSpotParser
 	 * @return array
 	 * @example returned array
 	 
-	 array(15) {
-  				["LIMBO"] => array(5) 
-  						{
-    						["desc"]  	=> "LIMBO is a black-and-white puzzle platforming adventure."
-    						["date"]	=> "2011-05-24"
-    						["ganre"] 	=> "2D Platforme"
-    						["rating"]	=> "9.0"
-    						["image"] 	=> "http://image.gamespotcdn.net/gamespot/images//2003/all/boxshots2/635383_218593.jpg"
-  						}
-  				}
+	 array {
+                [0] => array {
+                                ["name"]    =>  "LIMBO"
+                                ["desc"]    =>  "LIMBO is a black-and-white puzzle platforming adventure."
+                                ["date"]    =>  "2011-08-02"
+                                ["ganre"]   =>  "2D Platforme"
+                                ["rating"]  =>  "9.0"
+                                ["image"]   =>  "http://image.gamespotcdn.net/gamespot/images//2003/all/boxshots2/635383_218593.jpg"
+                              }
+            }
 	 ......................................................................................
 	 * @version 0.0.1
 	 */
@@ -104,12 +104,13 @@ class Evil_Parser_GameSpotParser
         $result = array();
         foreach ($name as $index=>$value)
         {
-        	$result[$value] = array(
-        								"desc"=>$desc[$index],
-        								"date"=>$date[$index],
-        								"ganre"=>$ganre[$index],
-        								"rating"=>$rating[$index],
-        								"image"=>$image[$index]        								
+        	$result[] = array(
+                                        "name"  =>  $value,
+        								"desc"  =>  $desc[$index],
+        								"date"  =>  $date[$index],
+        								"ganre" =>  $ganre[$index],
+        								"rating"=>  $rating[$index],
+        								"image" =>  $image[$index]
         							);
         }
         return ($result);
