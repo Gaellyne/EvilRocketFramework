@@ -6,7 +6,7 @@
  * @example $apiKey= 'c04029734cac3ccf1dccfdf7e45168a3';
  */
 
-class Evil_Parser_LastFmApi
+class Evil_Parser_MusicLastFm implements  Evil_Parser_Interface
 {
 	
 	/**
