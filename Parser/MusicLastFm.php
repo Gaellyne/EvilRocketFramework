@@ -8,7 +8,19 @@
 
 class Evil_Parser_MusicLastFm implements  Evil_Parser_Interface
 {
+    /**
+     * @desc application key
+     */
     protected $_apiKey = 'c04029734cac3ccf1dccfdf7e45168a3';
+
+
+    /**
+     * @desc get infomation
+     * @author makinder
+     * @param string $what
+     * @return array
+     * @version 0.0.1
+     */
 	public function parse($what = null)
     {
         switch($what)
@@ -16,8 +28,8 @@ class Evil_Parser_MusicLastFm implements  Evil_Parser_Interface
             case 'top': return $this->getTopTracks();break;
             case 'new': return $this->getLoveTracks();break;
             case null : //отдать все
-                $result['love'] = $this->getLoveTracks();
-                $result['top'] =  $this->getTopTracks();
+                $result['love'] = $this->_getLoveTracks();
+                $result['top'] =  $this->_getTopTracks();
                 return $result;
             break;
             default:
@@ -61,7 +73,7 @@ class Evil_Parser_MusicLastFm implements  Evil_Parser_Interface
 	 	...........................................................................
 	 * @version 0.0.1
 	 */
-	public function getTopTracks()
+	protected function _getTopTracks()
 	{
 		$url = 'http://ws.audioscrobbler.com/2.0/?method=chart.gettoptracks&api_key='.$this->_apiKey;
 
@@ -99,7 +111,7 @@ class Evil_Parser_MusicLastFm implements  Evil_Parser_Interface
 	 .................................................................................................
 	 * @version 0.0.1
 	 */
-	public function getLoveTracks()
+	protected function _getLoveTracks()
 	{
 		$url = 'http://ws.audioscrobbler.com/2.0/?method=chart.getlovedtracks&api_key='. $this->_apiKey;
 		$love = $this->_getTracks($url);
