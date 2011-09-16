@@ -27,7 +27,7 @@ class Evil_MediaParser
     {
         $this->directoryForParsers = __DIR__ . '/Parser';
 
-        $this->getFilesWithParsers();
+        $this->_getFilesWithParsers();
     }
 
     /**
@@ -60,7 +60,7 @@ class Evil_MediaParser
     public function parse($contentType = null, $category = null)
     {
         //если парсеры для данного типа контента не найдены
-        if (! $this->getParsersClass($contentType)) return false;
+        if (! $this->_getParsersClass($contentType)) return false;
 
         $category = strtolower($category);
         
@@ -79,7 +79,7 @@ class Evil_MediaParser
      * @throws Exception
      * @return array|null parsers file names
      */
-    protected function getFilesWithParsers()
+    protected function _getFilesWithParsers()
     {
         $handle = opendir($this->directoryForParsers);
         if (!$handle)
@@ -97,12 +97,13 @@ class Evil_MediaParser
     }
 
     /**
-     * Найти в файлах необходимые парсеры
+     * Найти в файлах необходимые для переданного Типа контента парсеры
+     * Если Контент не передан,
      * @throws Exception
      * @param null $contentType
      * @return null|array of Parsers name
      */
-    protected function getParsersClass($contentType = null)
+    protected function _getParsersClass($contentType = null)
     {
         foreach ($this->parserFiles as $key => $parser) {
             //если парсер не нужного типа
@@ -114,8 +115,11 @@ class Evil_MediaParser
             
             if (!class_exists($className))
                 throw new Exception("Parser $className not exist, but file $parser is found");
-            if (! in_array('Evil_Parser_Interface', class_implements($className)))
-                trigger_error('Class '. $className . " must be implements Evil_Parser_Interface", E_USER_WARNING);
+
+            if (! in_array('Evil_Parser_Interface', class_implements($className))){             //не имплементирует интерфейс
+                trigger_error('Class '. $className . " must be implements Evil_Parser_Interface.", E_USER_WARNING);
+                continue;
+            }
             
             array_push($this->classParser, $className);
         }
