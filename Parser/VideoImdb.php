@@ -26,11 +26,11 @@ class Evil_Parser_VideoImdb implements   Evil_Parser_Interface
 
         switch ($this->_whatWeNeed)
         {
-            case 'new': $url['new'] = 'http://www.imdb.com/nowplaying/#topten'; break;
+            case 'new': $url['new'] = 'http://www.imdb.com/nowplaying/'; break;
             case 'top': $url['top'] = 'http://www.imdb.com/chart/';break;
             case 'tv' : $url['tv']  = 'http://www.imdb.com/search/title?num_votes=5000,&sort=user_rating,desc&title_type=tv_series';break;
             case null : $url        = array(
-                                        'new' => 'http://www.imdb.com/nowplaying/#topten',
+                                        'new' => 'http://www.imdb.com/nowplaying/',
                                         'top' => 'http://www.imdb.com/chart/',
                                         'tv'  => 'http://www.imdb.com/search/title?num_votes=5000,&sort=user_rating,desc&title_type=tv_series'
                                     );break;
@@ -78,6 +78,7 @@ class Evil_Parser_VideoImdb implements   Evil_Parser_Interface
             $request = array();
             $hoho[$what] = array_unique($result);
         }
+
         return $hoho;
 	}
 
@@ -126,10 +127,18 @@ class Evil_Parser_VideoImdb implements   Evil_Parser_Interface
             }
 
             foreach ($request as $index=>$mas)
-            $request[$index]['Released'] = date("Y-m-d", strtotime($mas['Released']));
+            {
+                if($request[$index]['Response'] == 'True')
+                    $request[$index]['Released'] = date("Y-m-d", strtotime($mas['Released']));
+                
+                else
+                    unset($index);
 
+            }
             $result[$category] = $request;
 		}
+        Zend_Debug::dump($result);
+        die();
 		return $result;
     }
 
