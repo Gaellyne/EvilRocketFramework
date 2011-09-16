@@ -130,8 +130,6 @@ class Evil_Parser_VideoImdb implements   Evil_Parser_Interface
 
             $result[$category] = $request;
 		}
-Zend_Debug::dump($result);
-        die();
 		return $result;
     }
 
