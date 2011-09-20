@@ -21,12 +21,17 @@ class Evil_Email implements Evil_TransportInterface {
      * @return bool
      * 
      */
-    public function send ($to, $message)
+    public function send ($to, $message, $subject='информационное письмо')
     {
         if($this->_isValidRecipient($to))
         {
             $this->_mailer->clearRecipients();
-
+            
+            if (isset($this->_config['username']) && isset($this->_config['from']))
+            {
+                $this->_mailer->setFrom($this->_config['username'], $this->_config['from']);
+            }
+            $this->_mailer->setSubject($subject);
             $this->_mailer->setBodyText($message);
             $this->_mailer->addTo($to);
             return $this->_mailer->send();
