@@ -69,7 +69,8 @@ class Evil_MediaParser
         foreach ($this->classParser as $parser){
             $obj = new $parser();
             $res = $obj->parse($category);
-            $content[$contentType] = $res;
+
+            $content[$this->_getParserType($parser)] = $res;
         }
         return $content;
     }
@@ -126,5 +127,15 @@ class Evil_MediaParser
 
         if (empty($this->classParser)) return null;
         return $this->classParser;
-    }    
+    }
+
+    protected static function _getParserType($parser_name)
+    {
+        preg_match('/^Evil_Parser_([A-Z][a-z]*)/', $parser_name ,$type);
+        $type = strtolower($type[1]);
+
+        if (empty($type)) return new Exception('Не могу определить тип парсера '. $parser_name);
+
+        return $type;
+    }
 }
